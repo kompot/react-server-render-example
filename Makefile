@@ -23,14 +23,14 @@ prod_bundle:
 
 dev_server: clean dev_style dev_bundle
 	# starting dev server
-	@-NODE_ENV=development node --harmony src/js/server.js
+	@-NODE_ENV=development node --harmony src/js/server/server.js
 
 dev: clean
 	@NODE_ENV=development ${bin_path}/supervisor -i tests -e js,jsx,styl -x make dev_server
 
 prod: clean prod_style prod_bundle
 	# starting prod server
-	@NODE_ENV=production node --harmony src/js/server.js
+	@NODE_ENV=production node --harmony src/js/server/server.js
 
 lint:
 	# checking javascripts

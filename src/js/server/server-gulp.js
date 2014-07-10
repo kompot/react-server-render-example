@@ -8,28 +8,29 @@ var compression = require("compression");
 require("node-jsx").install({extension: ".jsx", harmony: true});
 
 var app = express();
-var ReactApp = require("./views/app");
-var ReactRouter = require("./routes");
-var Const = require("./const");
+var ReactApp = require("../views/app");
+var ReactRouter = require("../routes");
+var Const = require("../const");
 
 app.use(compression());
-app.use(express.static(__dirname + "/../../dev"));
+var staticFolder = process.cwd() + "/dev-gulp/client";
+app.use(express.static(staticFolder));
 
 app.use(morgan("short"));
 
-var commonBundlePath = "/common.bundle.js";
-var entryBundlePath = "/entry.bundle.js";
+var commonBundlePath = "/js/common.bundle.js";
+var entryBundlePath = "/js/entry.bundle.js";
 var bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(__dirname + "/../../dev" + commonBundlePath));
+bundleHash.update(fs.readFileSync(staticFolder + commonBundlePath));
 commonBundlePath += "?" + bundleHash.digest("hex");
 
 bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(__dirname + "/../../dev" + entryBundlePath));
+bundleHash.update(fs.readFileSync(staticFolder + entryBundlePath));
 entryBundlePath += "?" + bundleHash.digest("hex");
 
-var cssPath = "/app.css";
+var cssPath = "/css/app.css";
 var cssBundleHash = crypto.createHash("sha1");
-cssBundleHash.update(fs.readFileSync(__dirname + "/../../dev" + cssPath));
+cssBundleHash.update(fs.readFileSync(staticFolder + cssPath));
 cssPath += "?" + cssBundleHash.digest("hex");
 
 
