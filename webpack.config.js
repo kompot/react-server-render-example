@@ -3,11 +3,11 @@ var webpack = require("webpack");
 module.exports = {
   cache: true,
   entry: {
-    entry: "./views/entry",
-    fake: "./webpack-common"
+    entry: "./src/js/views/entry",
+    fake: "./src/js/webpack-common"
   },
   output: {
-    path: __dirname + "/static",
+    path: __dirname + "/dev",
     filename: "[name].bundle.js"
   },
   resolve: {

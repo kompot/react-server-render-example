@@ -15,6 +15,9 @@
     "npm": "1.4.15"
   },
   "dependencies": {
+    "express": "^4.2.0"
+  },
+  "devDependencies": {
     "autoprefixer-stylus": "^0.1.0",
     "chai": "^1.9.1",
     "chai-as-promised": "^4.1.1",
@@ -23,7 +26,12 @@
     "compression": "^1.0.8",
     "envify-loader": "^0.1.0",
     "es6-promise": "~1.0.0",
-    "express": "^4.2.0",
+    "gulp": "^3.8.6",
+    "gulp-autoprefixer": "0.0.8",
+    "gulp-load-plugins": "^0.5.3",
+    "gulp-stylus": "^1.0.4",
+    "gulp-util": "^2.2.20",
+    "gulp-webpack": "^0.1.0",
     "jsx-loader": "^0.10.2",
     "jsxhint": "^0.4.10",
     "lodash": "^2.4.1",
@@ -32,6 +40,7 @@
     "nib": "^1.0.2",
     "node-jsx": "^0.10.0",
     "react": "^0.10.0",
+    "run-sequence": "^0.3.6",
     "selenium-webdriver": "^2.42.1",
     "stylus": "^0.46.3",
     "superagent": "^0.18.0",

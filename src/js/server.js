@@ -13,23 +13,23 @@ var ReactRouter = require("./routes");
 var Const = require("./const");
 
 app.use(compression());
-app.use(express.static(__dirname + "/static"));
+app.use(express.static(__dirname + "/../../dev"));
 
 app.use(morgan("short"));
 
 var commonBundlePath = "/common.bundle.js";
 var entryBundlePath = "/entry.bundle.js";
 var bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(__dirname + "/static" + commonBundlePath));
+bundleHash.update(fs.readFileSync(__dirname + "/../../dev" + commonBundlePath));
 commonBundlePath += "?" + bundleHash.digest("hex");
 
 bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(__dirname + "/static" + entryBundlePath));
+bundleHash.update(fs.readFileSync(__dirname + "/../../dev" + entryBundlePath));
 entryBundlePath += "?" + bundleHash.digest("hex");
 
 var cssPath = "/app.css";
 var cssBundleHash = crypto.createHash("sha1");
-cssBundleHash.update(fs.readFileSync(__dirname + "/static" + cssPath));
+cssBundleHash.update(fs.readFileSync(__dirname + "/../../dev" + cssPath));
 cssPath += "?" + cssBundleHash.digest("hex");
 
 

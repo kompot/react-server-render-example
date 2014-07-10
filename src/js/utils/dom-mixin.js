@@ -58,7 +58,7 @@ var DomMixin = {
     var self = this;
     return function() {
       self.safeSetState(update);
-    }
+    };
   }
 
 };
