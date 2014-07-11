@@ -2,10 +2,10 @@
 
 var React = require("react");
 var Const = require("../const");
-var Grid = require("./grid");
-var Element = require("./element");
-var Preloader = require("../components/preloader");
-var NotFound = require("./not-found");
+var Grid = require("./grid.jsx");
+var Element = require("./element.jsx");
+var Preloader = require("../components/preloader.jsx");
+var NotFound = require("./not-found.jsx");
 var dispatch = require("../dispatch");
 
 var PropTypes = React.PropTypes;

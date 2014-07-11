@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var PopupBase = require("../components/popup-base");
+var PopupBase = require("../components/popup-base.jsx");
 
 var Popup = React.createClass({
 

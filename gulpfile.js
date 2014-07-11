@@ -6,6 +6,7 @@ var $ = require('gulp-load-plugins')({
   pattern: 'gulp{-,.}*',
   replaceString: /gulp(\-|\.)/
 });
+var revall = require('gulp-rev-all');
 var webpack = require("webpack");
 var runSequence = require('run-sequence');
 var nib = require('nib');
@@ -56,7 +57,7 @@ var paths = {
 };
 
 gulp.task('stylus', function () {
-  gulp.src(paths.src.cssCompile)
+  return gulp.src(paths.src.cssCompile)
     .pipe($.stylus(stylusConfig))
     .on('error', $.util.log)
     .pipe($.autoprefixer())
@@ -76,8 +77,8 @@ gulp.task('clean', function () {
 });
 
 gulp.task('copy:server', function () {
-//  gulp.src([paths.src.jsWatch])
-//    .pipe(gulp.dest(paths.dst[$.util.env.type].jsServer));
+  return gulp.src(paths.src.jsWatch)
+    .pipe(gulp.dest(paths.dst[$.util.env.type].jsServer));
 });
 
 gulp.task('webpack', function() {
@@ -103,10 +104,26 @@ gulp.task('webpack', function() {
       },
       plugins: [new webpack.optimize.CommonsChunkPlugin("common.bundle.js")]
     }, webpack))
-    .pipe($.util.env.type === 'prod' ? $.uglify() : $.util.noop())
+    // TODO uglify fails
+//    .pipe($.util.env.type === 'prod' ? $.uglify() : $.util.noop())
 //    .pipe($.rename(webpackPrefix + '.js'))
     .pipe($.filesize())
     .pipe(gulp.dest(paths.dst[$.util.env.type].js));
+});
+
+gulp.task('hash', function () {
+  var filterServer = $.filter(['**/*.js', '**/*.jsx']);
+  var filterClient = $.filter(['**/*', '!**/*.js', '!**/*.jsx', '**/*' + webpackPrefix + '*.js'])
+  return gulp.src([
+      paths.dst[$.util.env.type].root + client + '/**/*',
+      paths.dst[$.util.env.type].root + server + '/**/*'
+    ])
+    .pipe(revall())
+    .pipe(filterServer)
+    .pipe(gulp.dest(paths.dst[$.util.env.type].rootHashed + server))
+    .pipe(filterServer.restore())
+    .pipe(filterClient)
+    .pipe(gulp.dest(paths.dst[$.util.env.type].rootHashed + client));
 });
 
 var httpDev;
@@ -120,6 +137,7 @@ gulp.task('http:dev', ['copy:server'], function () {
 gulp.task('build', function (callback) {
   runSequence('clean',
     ['stylus', 'webpack', 'copy:server'],
+    'hash',
     callback);
 });
 
@@ -128,6 +146,6 @@ gulp.task('default', function (callback) {
     ['stylus', 'webpack', 'copy:server'],
     'http:dev', callback);
   gulp.watch(paths.src.cssWatch,    ['stylus']);
-  gulp.watch(paths.src.jsWatch,     ['webpack', 'http:dev', 'copy:server']);
+  gulp.watch(paths.src.jsWatch,     ['webpack', 'http:dev']);
 });
 

@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var PopupBase = require("../components/popup-base");
+var PopupBase = require("../components/popup-base.jsx");
 var dispatch = require("../dispatch");
 var logging = require("../utils/logging");
 

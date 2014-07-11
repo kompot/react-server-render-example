@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Link = require("./link");
+var Link = require("./link.jsx");
 var routes = require("../routes");
 var PropTypes = React.PropTypes;
 var cx = require("react/lib/cx");

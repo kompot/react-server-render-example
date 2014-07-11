@@ -1,5 +1,5 @@
-/dev/*.bundle.js
-/dev/*.css
-/dev/*.bundle.js.map
-/node_modules
+dev/
+prod/
+prod-hashed/
+node_modules/
 .DS_Store

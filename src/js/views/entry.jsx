@@ -12,7 +12,7 @@ if (isMobile()) {
 var logging = require("../utils/logging");
 logging.info("app starting");
 
-var App = require("./app");
+var App = require("./app.jsx");
 var routes = require("../routes");
 var app = React.renderComponent(App(window.appProps), document);
 routes.attach(app);

@@ -8,31 +8,17 @@ var compression = require("compression");
 require("node-jsx").install({extension: ".jsx", harmony: true});
 
 var app = express();
-var ReactApp = require("../views/app");
+var ReactApp = require("../views/app.jsx");
 var ReactRouter = require("../routes");
 var Const = require("../const");
 
 app.use(compression());
-var staticFolder = process.cwd() + "/dev-gulp/client";
+// TODO replace /dev-gulp/client with a configurable variable
+var staticFolder = process.env.NODE_STATIC_DIR || (process.cwd() + '/dev-gulp/client');
+console.log('staticFolder', staticFolder);
 app.use(express.static(staticFolder));
 
 app.use(morgan("short"));
-
-var commonBundlePath = "/js/common.bundle.js";
-var entryBundlePath = "/js/entry.bundle.js";
-var bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(staticFolder + commonBundlePath));
-commonBundlePath += "?" + bundleHash.digest("hex");
-
-bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(staticFolder + entryBundlePath));
-entryBundlePath += "?" + bundleHash.digest("hex");
-
-var cssPath = "/css/app.css";
-var cssBundleHash = crypto.createHash("sha1");
-cssBundleHash.update(fs.readFileSync(staticFolder + cssPath));
-cssPath += "?" + cssBundleHash.digest("hex");
-
 
 app.get("/riak/*", function(req, res, next) {
   if (req.path === "/riak/test/grid") {
@@ -82,9 +68,9 @@ app.get("/*", function(req, res, next) {
   ReactRouter.getProps(req.path).then(function(data) {
     var component = ReactApp({
       path: req.path,
-      entryBundlePath: entryBundlePath,
-      commonBundlePath: commonBundlePath,
-      cssPath: cssPath,
+      entryBundlePath: "/js/entry.bundle.js",
+      commonBundlePath: "/js/common.bundle.js",
+      cssPath: "/css/app.css",
       pageType: data.pageType,
       pageData: data.pageData,
       locked: false
