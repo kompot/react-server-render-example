@@ -1,6 +1,7 @@
 'use strict';
 
 var spawn = require('child_process').spawn;
+var path = require('path');
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')({
   pattern: 'gulp{-,.}*',
@@ -101,6 +102,28 @@ gulp.task('http:dev', ['copy:server'], function () {
   httpDev = spawn('node', ['--harmony', paths.src.js + paths.serverEntry], { stdio: 'inherit' });
 });
 
+gulp.task('fb-flo', function () {
+  var flo = require('fb-flo');
+  var fs = require('fs');
+
+  var server = flo(paths.dst.development.rootClient, {
+      port: 8888,
+      host: '127.0.0.1',
+      glob: [ '**/*.js', '**/*.css' ]
+    }, function resolver(filepath, callback) {
+      callback({
+        resourceURL: filepath,
+        contents: fs.readFileSync(path.join(paths.dst.development.rootClient, filepath)),
+        reload: false
+      });
+    }
+  );
+
+  server.once('ready', function() {
+    $.util.log('Hot reloading js/css with `fb-flo` started.');
+  });
+});
+
 gulp.task('build', function (callback) {
   runSequence('clean',
     ['stylus', 'webpack', 'copy:server'],
@@ -111,7 +134,7 @@ gulp.task('build', function (callback) {
 gulp.task('default', function (callback) {
   runSequence('clean',
     ['stylus', 'webpack', 'copy:server'],
-    'http:dev', callback);
+    'fb-flo', 'http:dev', callback);
   gulp.watch(paths.src.cssWatch,    ['stylus']);
   gulp.watch(paths.src.jsWatch,     ['webpack', 'http:dev']);
 });

@@ -22,6 +22,7 @@ module.exports = {
   dst: {
     development: {
       root:       dstDevPath,
+      rootClient: dstDevPath + client,
       css:        dstDevPath + client + '/css',
       js:         dstDevPath + client + '/js',
       jsServer:   dstDevPath + server + '/js'

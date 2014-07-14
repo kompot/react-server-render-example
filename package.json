@@ -27,6 +27,7 @@
     "compression": "^1.0.8",
     "envify-loader": "^0.1.0",
     "es6-promise": "~1.0.0",
+    "fb-flo": "^0.2.1",
     "gulp": "^3.8.6",
     "gulp-autoprefixer": "0.0.8",
     "gulp-csso": "^0.2.9",
