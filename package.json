@@ -6,16 +6,17 @@
   "repository": "http://github.com/barbuza/react-server-render-example",
   "scripts": {
     "test": "make lint",
-    "postinstall": "make clean prod_style prod_bundle"
+    "postinstall": "make clean prod_style prod_bundle",
+    "build-and-run": "node_modules/.bin/gulp build && NODE_STATIC_DIR=./prod-hashed/client && node prod-hashed/server/js/server/server-gulp.*.js"
   },
   "author": "Victor Kotseruba <barbuzaster@gmail.com>",
   "license": "MIT",
   "engines": {
-    "node": "0.10.28",
+    "node": "0.10.29",
     "npm": "1.4.15"
   },
   "dependencies": {
-    "express": "^4.2.0"
+    "express": "^4.6.1"
   },
   "devDependencies": {
     "autoprefixer-stylus": "^0.1.0",
@@ -33,24 +34,24 @@
     "gulp-filter": "^0.5.0",
     "gulp-load-plugins": "^0.5.3",
     "gulp-rename": "^1.2.0",
-    "gulp-rev-all": "^0.5.10",
+    "gulp-rev-all": "^0.5.11",
     "gulp-rimraf": "^0.1.0",
-    "gulp-stylus": "^1.0.4",
+    "gulp-stylus": "^1.0.5",
     "gulp-uglify": "^0.3.1",
     "gulp-util": "^2.2.20",
     "gulp-webpack": "^0.1.0",
     "jsx-loader": "^0.10.2",
-    "jsxhint": "^0.4.10",
+    "jsxhint": "^0.4.13",
     "lodash": "^2.4.1",
     "mocha": "^1.20.1",
-    "morgan": "^1.0.1",
-    "nib": "^1.0.2",
+    "morgan": "^1.1.1",
+    "nib": "^1.0.3",
     "node-jsx": "^0.10.0",
     "react": "^0.10.0",
     "run-sequence": "^0.3.6",
     "selenium-webdriver": "^2.42.1",
-    "stylus": "^0.46.3",
-    "superagent": "^0.18.0",
+    "stylus": "^0.47.1",
+    "superagent": "^0.18.2",
     "supervisor": "^0.6.0",
     "webdriver-sizzle": "0.0.6",
     "webpack": "^1.3.1-beta8",

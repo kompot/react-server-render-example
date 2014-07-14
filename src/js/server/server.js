@@ -5,10 +5,10 @@ var morgan = require("morgan");
 var crypto = require("crypto");
 var compression = require("compression");
 
-require("node-jsx").install({extension: ".js", harmony: true});
+require("node-jsx").install({extension: ".jsx", harmony: true});
 
 var app = express();
-var ReactApp = require("../views/app.js");
+var ReactApp = require("../views/app.jsx");
 var ReactRouter = require("../routes");
 var Const = require("../const");
 

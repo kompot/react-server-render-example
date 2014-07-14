@@ -1,6 +1,7 @@
 var express = require("express");
 var React = require("react");
 var fs = require("fs");
+var path = require("path");
 var morgan = require("morgan");
 var crypto = require("crypto");
 var compression = require("compression");
@@ -13,8 +14,7 @@ var ReactRouter = require("../routes");
 var Const = require("../const");
 
 app.use(compression());
-// TODO replace /dev-gulp/client with a configurable variable
-var staticFolder = process.env.NODE_STATIC_DIR || (process.cwd() + '/dev-gulp/client');
+var staticFolder = process.env.NODE_STATIC_DIR || (path.join(process.cwd(), require('../../../gulppaths').dst.development.root, require('../../../gulppaths').client));
 console.log('staticFolder', staticFolder);
 app.use(express.static(staticFolder));
 

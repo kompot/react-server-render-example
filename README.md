@@ -4,5 +4,8 @@ this app demonstrates [react](http://facebook.github.io/react/) ability to share
 
 ## usage
 
-    npm install
-    make dev
+* `npm install`
+* `gulp` to develop
+* `gulp build` to build production ready distribution
+* `npm run-script build-and-run` to run it
+    
