@@ -16,7 +16,7 @@ module.exports = {
     cssCompile: [srcPath + '/styles/app.styl',
            '!' + srcPath + '/styles/_*.styl'],
     js:          srcPath + '/js',
-    jsWatch:     [srcPath + '/js/**/*', srcPath + '/js/**/*.jsx'],
+    jsWatch:     [srcPath + '/js/**/*.js', srcPath + '/js/**/*.jsx'],
     jsServer:    srcPath + '/js/server/**/*'
   },
   dst: {

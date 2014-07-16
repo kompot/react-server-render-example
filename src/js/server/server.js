@@ -1,6 +1,7 @@
 var express = require("express");
 var React = require("react");
 var fs = require("fs");
+var path = require("path");
 var morgan = require("morgan");
 var crypto = require("crypto");
 var compression = require("compression");
@@ -13,23 +14,23 @@ var ReactRouter = require("../routes");
 var Const = require("../const");
 
 app.use(compression());
-app.use(express.static(__dirname + "/../../../dev"));
+app.use(express.static(path.join(__dirname, "/../../../dev")));
 
 app.use(morgan("short"));
 
 var commonBundlePath = "/common.bundle.js";
 var entryBundlePath = "/entry.bundle.js";
 var bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(__dirname + "/../../../dev" + commonBundlePath));
+bundleHash.update(fs.readFileSync(path.join(__dirname, "/../../../dev", commonBundlePath)));
 commonBundlePath += "?" + bundleHash.digest("hex");
 
 bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(__dirname + "/../../../dev" + entryBundlePath));
+bundleHash.update(fs.readFileSync(path.join(__dirname, "/../../../dev", entryBundlePath)));
 entryBundlePath += "?" + bundleHash.digest("hex");
 
 var cssPath = "/app.css";
 var cssBundleHash = crypto.createHash("sha1");
-cssBundleHash.update(fs.readFileSync(__dirname + "/../../../dev" + cssPath));
+cssBundleHash.update(fs.readFileSync(path.join(__dirname, "/../../../dev", cssPath)));
 cssPath += "?" + cssBundleHash.digest("hex");
 
 

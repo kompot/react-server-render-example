@@ -27,7 +27,7 @@ module.exports = {
       sleep: function(duration) {
         return driver.sleep(duration);
       }
-    }
+    };
   },
   expect: chai.expect,
   assert: chai.assert

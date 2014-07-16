@@ -67,7 +67,16 @@ var webpackConfig = {
   ]
 };
 
-gulp.task('webpack', function() {
+gulp.task('lint:js', function() {
+  return gulp.src(paths.src.jsWatch)
+    .pipe($.react())
+    .pipe($.eslint())
+    .pipe($.eslint.formatEach(undefined, process.stderr))
+    .pipe(process.env.NODE_ENV === 'production' ? $.eslint.failOnError() : $.util.noop())
+    .pipe(gulp.dest('../output'));
+});
+
+gulp.task('webpack', ['lint:js'], function() {
   if (process.env.NODE_ENV === 'production') {
     delete webpackConfig.devtool;
   }

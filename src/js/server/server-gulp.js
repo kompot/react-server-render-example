@@ -3,7 +3,6 @@ var React = require("react");
 var fs = require("fs");
 var path = require("path");
 var morgan = require("morgan");
-var crypto = require("crypto");
 var compression = require("compression");
 
 require("node-jsx").install({extension: ".jsx", harmony: true});

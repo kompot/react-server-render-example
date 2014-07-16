@@ -12,8 +12,7 @@ var isMobile = require("../utils/mobile.js");
 var itemShape = {
   id: PropTypes.number.isRequired,
   title: PropTypes.string.isRequired,
-  image: PropTypes.string.isRequired
-};
+  image: PropTypes.string.isRequired};
 
 var RateHelper = React.createClass({
   getInitialState: function() {
@@ -111,9 +110,9 @@ var Grid = React.createClass({
     ).isRequired
   },
   render: function() {
-    var items = _.map(this.props.items,
-                      (item, index) => <GridItem title={item.title} id={item.id}
-                                                 image={item.image} key={index} />);
+    var items = _.map(this.props.items, function (item, index) {
+      return <GridItem title={item.title} id={item.id} image={item.image} key={index} />;
+    });
     return (
       <div className="grid">
         <h1>grid sample</h1>
