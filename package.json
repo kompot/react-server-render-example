@@ -7,7 +7,7 @@
   "scripts": {
     "test": "make lint",
     "postinstall": "make clean prod_style prod_bundle",
-    "build-and-run": "node_modules/.bin/gulp build && NODE_STATIC_DIR=./prod-hashed/client && node prod-hashed/server/js/server/server-gulp.*.js"
+    "build-and-run": "node_modules/.bin/gulp build && export NODE_STATIC_DIR=./prod-hashed/client && node prod-hashed/server/js/server/server-gulp.*.js"
   },
   "author": "Victor Kotseruba <barbuzaster@gmail.com>",
   "license": "MIT",

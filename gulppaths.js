@@ -1,5 +1,4 @@
 var srcPath       = './src';
-var srcLintedPath = './linted';
 var dstProdPath   = './prod';
 var dstDevPath    = './dev-gulp';
 var dstHashPath   = '-hashed';
@@ -9,7 +8,6 @@ var server        = '/server';
 module.exports = {
   serverEntry:   '/server/server-gulp.js',
   webpackPrefix: 'bundle',
-  srcLintedPath: srcLintedPath,
   client:        client,
   server:        server,
   src: {

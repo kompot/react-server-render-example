@@ -13,8 +13,9 @@ var ReactRouter = require("../routes");
 var Const = require("../const");
 
 app.use(compression());
+console.log('process.env.NODE_STATIC_DIR ', process.env.NODE_STATIC_DIR);
 var staticFolder = process.env.NODE_STATIC_DIR || (path.join(process.cwd(), require('../../../gulppaths').dst.development.root, require('../../../gulppaths').client));
-console.log('staticFolder', staticFolder);
+console.log('staticFolder ', staticFolder);
 app.use(express.static(staticFolder));
 
 app.use(morgan("short"));

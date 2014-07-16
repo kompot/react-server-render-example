@@ -29,7 +29,7 @@ gulp.task('stylus', function () {
 });
 
 gulp.task('clean', function () {
-  var pathsToClean = [paths.dst[process.env.NODE_ENV].root, paths.srcLintedPath];
+  var pathsToClean = [paths.dst[process.env.NODE_ENV].root];
   if (process.env.NODE_ENV === 'production') {
     pathsToClean.push(paths.dst[process.env.NODE_ENV].rootHashed);
   }
@@ -68,13 +68,12 @@ var webpackConfig = {
 };
 
 gulp.task('lint:js', function() {
-  return gulp.src(paths.src.jsWatch)
+  gulp.src(paths.src.jsWatch)
     .pipe($.react())
     .pipe($.traceur())
     .pipe($.eslint())
     .pipe($.eslint.formatEach(undefined, process.stderr))
-    .pipe(process.env.NODE_ENV === 'production' ? $.eslint.failOnError() : $.util.noop())
-    .pipe(gulp.dest(paths.srcLintedPath));
+    .pipe(process.env.NODE_ENV === 'production' ? $.eslint.failOnError() : $.util.noop());
 });
 
 gulp.task('webpack', function() {
