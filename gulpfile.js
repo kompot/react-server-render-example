@@ -70,13 +70,14 @@ var webpackConfig = {
 gulp.task('lint:js', function() {
   return gulp.src(paths.src.jsWatch)
     .pipe($.react())
+    .pipe($.traceur())
     .pipe($.eslint())
     .pipe($.eslint.formatEach(undefined, process.stderr))
     .pipe(process.env.NODE_ENV === 'production' ? $.eslint.failOnError() : $.util.noop())
     .pipe(gulp.dest('../output'));
 });
 
-gulp.task('webpack', ['lint:js'], function() {
+gulp.task('webpack', function() {
   if (process.env.NODE_ENV === 'production') {
     delete webpackConfig.devtool;
   }
@@ -134,7 +135,7 @@ gulp.task('fb-flo', function () {
 });
 
 gulp.task('build', function (callback) {
-  runSequence('clean',
+  runSequence('clean', 'lint:js',
     ['stylus', 'webpack', 'copy:server'],
     'hash',
     callback);
@@ -142,9 +143,9 @@ gulp.task('build', function (callback) {
 
 gulp.task('default', function (callback) {
   runSequence('clean',
-    ['stylus', 'webpack', 'copy:server'],
+    ['lint:js', 'stylus', 'webpack', 'copy:server'],
     'fb-flo', 'http:dev', callback);
   gulp.watch(paths.src.cssWatch,    ['stylus']);
-  gulp.watch(paths.src.jsWatch,     ['webpack', 'http:dev']);
+  gulp.watch(paths.src.jsWatch,     ['lint:js', 'webpack', 'http:dev']);
 });
 

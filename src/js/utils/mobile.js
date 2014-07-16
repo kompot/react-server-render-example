@@ -1,5 +1,3 @@
-'use strict';
-
 var isMobile;
 
 function checkMobile() {

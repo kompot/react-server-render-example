@@ -110,9 +110,9 @@ var Grid = React.createClass({
     ).isRequired
   },
   render: function() {
-    var items = _.map(this.props.items, function (item, index) {
-      return <GridItem title={item.title} id={item.id} image={item.image} key={index} />;
-    });
+    var items = _.map(this.props.items, (item, index) =>
+      <GridItem title={item.title} id={item.id} image={item.image} key={index} />)
+    ;
     return (
       <div className="grid">
         <h1>grid sample</h1>
