@@ -13,6 +13,8 @@ var runSequence = require('run-sequence');
 var nib = require('nib');
 var stylusConfig = { use: [nib()] };
 var paths = require('./gulppaths.js');
+var pagespeed = require('psi');
+var ngrok = require('ngrok');
 
 var implicitEnv = $.util.env._[0] === 'build' ? 'production' : 'development';
 process.env.NODE_ENV = process.env.NODE_ENV || implicitEnv;
@@ -131,6 +133,29 @@ gulp.task('fb-flo', function () {
   server.once('ready', function() {
     $.util.log('Hot reloading js/css with `fb-flo` started.');
   });
+});
+
+gulp.task('pagespeed:ngrok', function (callback) {
+  ngrok.connect(8080, function(err, url) {
+    if (err) {
+      $.util.log(err)
+    }
+    $.util.log('Will do PageSpeed test on', url);
+    pagespeed({
+      nokey: 'true',
+      url: url,
+      // apply `mobile` strategy, log results after each build
+      strategy: 'desktop'
+    }, callback);
+  });
+});
+
+gulp.task('pagespeed:ngrok-disconnect', function () {
+  ngrok.disconnect();
+});
+
+gulp.task('pagespeed', function(callback) {
+  runSequence('pagespeed:ngrok', 'pagespeed:ngrok-disconnect', callback);
 });
 
 gulp.task('build', function (callback) {
