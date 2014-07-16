@@ -5,9 +5,9 @@ var path = require('path');
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')({
   pattern: 'gulp{-,.}*',
-  replaceString: /gulp(\-|\.)/
+  replaceString: /gulp(\-|\.)/,
+  camelize: true
 });
-var revall = require('gulp-rev-all');
 var webpack = require("webpack");
 var runSequence = require('run-sequence');
 var nib = require('nib');
@@ -95,7 +95,7 @@ gulp.task('hash', function () {
       paths.dst[process.env.NODE_ENV].root + paths.client + '/**/*',
       paths.dst[process.env.NODE_ENV].root + paths.server + '/**/*'
     ])
-    .pipe(revall())
+    .pipe($.revAll())
     .pipe(filterServer)
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].rootHashed + paths.server))
     .pipe(filterServer.restore())
