@@ -29,7 +29,7 @@ gulp.task('stylus', function () {
 });
 
 gulp.task('clean', function () {
-  var pathsToClean = [paths.dst[process.env.NODE_ENV].root];
+  var pathsToClean = [paths.dst[process.env.NODE_ENV].root, paths.srcLintedPath];
   if (process.env.NODE_ENV === 'production') {
     pathsToClean.push(paths.dst[process.env.NODE_ENV].rootHashed);
   }
@@ -74,7 +74,7 @@ gulp.task('lint:js', function() {
     .pipe($.eslint())
     .pipe($.eslint.formatEach(undefined, process.stderr))
     .pipe(process.env.NODE_ENV === 'production' ? $.eslint.failOnError() : $.util.noop())
-    .pipe(gulp.dest('../output'));
+    .pipe(gulp.dest(paths.srcLintedPath));
 });
 
 gulp.task('webpack', function() {
