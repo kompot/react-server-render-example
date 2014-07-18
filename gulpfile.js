@@ -65,7 +65,8 @@ var webpackConfig = {
     ]
   },
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin("common.bundle.js")
+    new webpack.optimize.CommonsChunkPlugin("common.bundle.js"),
+    new webpack.optimize.OccurenceOrderPlugin(true)
   ]
 };
 
