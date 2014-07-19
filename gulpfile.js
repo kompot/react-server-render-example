@@ -1,6 +1,7 @@
 'use strict';
 
 var spawn = require('child_process').spawn;
+var exec = require('child_process').exec;
 var path = require('path');
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')({
@@ -16,7 +17,15 @@ var paths = require('./gulppaths.js');
 var pagespeed = require('psi');
 var ngrok = require('ngrok');
 
-var implicitEnv = $.util.env._[0] === 'build' ? 'production' : 'development';
+var implicitEnvsByTask = {
+  'default':   'development',
+  'build':     'production',
+  'pagespeed': 'production',
+  'run':       'production',
+  'test':      'production'
+}
+var task = $.util.env._[0];
+var implicitEnv = implicitEnvsByTask[task] ? implicitEnvsByTask[task] : 'development';
 process.env.NODE_ENV = process.env.NODE_ENV || implicitEnv;
 $.util.log('Environment is `' + process.env.NODE_ENV + '`.');
 
@@ -71,6 +80,9 @@ var webpackConfig = {
 };
 
 gulp.task('lint:js', function() {
+  // not async
+  // http://stackoverflow.com/questions/21699146/gulp-js-task-return-on-src
+  // should be fixed for correct task ordering
   gulp.src(paths.src.jsWatch)
     .pipe($.react())
     .pipe($.traceur())
@@ -91,14 +103,23 @@ gulp.task('webpack', function() {
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].js));
 });
 
-gulp.task('hash', function () {
+gulp.task('hash', function (callback) {
   var filterServer = $.filter(['**/*.js', '**/*.jsx']);
   var filterClient = $.filter(['**/*', '!**/*.js', '!**/*.jsx', '**/*' + paths.webpackPrefix + '*.js'])
-  return gulp.src([
+  gulp.src([
       paths.dst[process.env.NODE_ENV].root + paths.client + '/**/*',
       paths.dst[process.env.NODE_ENV].root + paths.server + '/**/*'
     ])
-    .pipe($.revAll())
+    .pipe($.revAll({
+        transformFilename: function (file, hash) {
+          var ext = path.extname(file.path);
+          if (file.path.indexOf(paths.serverEntry) != -1) {
+            return path.basename(file.path, ext) + ext;
+          } else {
+            return path.basename(file.path, ext) + '.' + hash.substr(0, 8) + ext;
+          }
+        }
+      }, callback))
     .pipe(filterServer)
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].rootHashed + paths.server))
     .pipe(filterServer.restore())
@@ -106,12 +127,44 @@ gulp.task('hash', function () {
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].rootHashed + paths.client));
 });
 
-var httpDev;
-gulp.task('http:dev', ['copy:server'], function () {
-  if (httpDev) {
-    httpDev.kill('SIGTERM');
+require('coffee-script/register');
+
+gulp.task('test:private', function (callback) {
+  gulp.src(paths.tst.root, { read: false })
+      .pipe($.mocha({
+        reporter: 'spec',
+        require: 'chai',
+        timeout: 100000
+      }, callback));
+});
+
+var httpServer;
+gulp.task('http', function (callback) {
+  if (httpServer) {
+    httpServer.kill('SIGTERM');
   }
-  httpDev = spawn('node', ['--harmony', paths.src.js + paths.serverEntry], { stdio: 'inherit' });
+  // TODO optimize paths, think about hashed as a separate environment
+  var entryPoint = process.env.NODE_ENV === 'production' ?
+      paths.dst.production.rootHashedServer + '/js' + paths.serverEntry :
+      paths.src.js + paths.serverEntry;
+  if (process.env.NODE_ENV === 'production') {
+    process.env.NODE_STATIC_DIR = paths.dst.production.rootHashedClient
+  } else {
+    delete process.env.NODE_STATIC_DIR;
+  }
+  httpServer = spawn('node', ['--harmony', entryPoint], {stdio: 'inherit'});
+  setTimeout(function () {
+    // some delay to let node start up before reporting it's up
+    // should be replaced with a real watcher
+    callback()
+  }, 100);
+});
+
+gulp.task('http:kill', function (callback) {
+  if (httpServer) {
+    httpServer.kill('SIGTERM');
+  }
+  callback()
 });
 
 gulp.task('fb-flo', function () {
@@ -155,7 +208,7 @@ gulp.task('pagespeed:ngrok-disconnect', function () {
   ngrok.disconnect();
 });
 
-gulp.task('pagespeed', function(callback) {
+gulp.task('pagespeed:private', function(callback) {
   runSequence('pagespeed:ngrok', 'pagespeed:ngrok-disconnect', callback);
 });
 
@@ -166,11 +219,23 @@ gulp.task('build', function (callback) {
     callback);
 });
 
+gulp.task('run', function (callback) {
+  runSequence('build', 'http', callback)
+});
+
+gulp.task('test', function (callback) {
+  runSequence('run', 'test:private', 'http:kill', callback);
+});
+
+gulp.task('pagespeed', function (callback) {
+  runSequence('run', 'pagespeed:private', 'http:kill', callback);
+});
+
 gulp.task('default', function (callback) {
   runSequence('clean',
     ['lint:js', 'stylus', 'webpack', 'copy:server'],
-    'fb-flo', 'http:dev', callback);
+    'fb-flo', 'http', callback);
   gulp.watch(paths.src.cssWatch,    ['stylus']);
-  gulp.watch(paths.src.jsWatch,     ['lint:js', 'webpack', 'http:dev']);
+  gulp.watch(paths.src.jsWatch,     ['lint:js', 'webpack', 'http']);
 });
 

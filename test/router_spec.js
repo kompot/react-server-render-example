@@ -1,4 +1,4 @@
-var Router = require("../router");
+var Router = require("../src/js/router");
 var expect = require("chai").expect;
 
 describe("Router", function() {

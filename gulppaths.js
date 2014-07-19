@@ -30,9 +30,14 @@ module.exports = {
     production: {
       root:       dstProdPath,
       rootHashed: dstProdPath + dstHashPath,
+      rootHashedClient: dstProdPath + dstHashPath + client,
+      rootHashedServer: dstProdPath + dstHashPath + server,
       css:        dstProdPath + client + '/css',
       js:         dstProdPath + client + '/js',
       jsServer:   dstProdPath + server + '/js'
     }
+  },
+  tst: {
+    root:         ['./test/*.js', './test/*.coffee']
   }
 };

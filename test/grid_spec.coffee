@@ -4,7 +4,7 @@ describe "grid on index page", ->
 
   [driver, sleep, $] = [null, null, null]
 
-  before -> {driver, $, sleep} = makeDriver("http://react-example.herokuapp.com")
+  before -> {driver, $, sleep} = makeDriver("http://localhost:8080")
 
   after -> driver.quit()
 
