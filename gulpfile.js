@@ -103,28 +103,40 @@ gulp.task('webpack', function() {
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].js));
 });
 
-gulp.task('hash', function (callback) {
-  var filterServer = $.filter(['**/*.js', '**/*.jsx']);
-  var filterClient = $.filter(['**/*', '!**/*.js', '!**/*.jsx', '**/*' + paths.webpackPrefix + '*.js'])
-  gulp.src([
-      paths.dst[process.env.NODE_ENV].root + paths.client + '/**/*',
-      paths.dst[process.env.NODE_ENV].root + paths.server + '/**/*'
-    ])
-    .pipe($.revAll({
-        transformFilename: function (file, hash) {
-          var ext = path.extname(file.path);
-          if (file.path.indexOf(paths.serverEntry) != -1) {
-            return path.basename(file.path, ext) + ext;
-          } else {
-            return path.basename(file.path, ext) + '.' + hash.substr(0, 8) + ext;
-          }
-        }
-      }, callback))
-    .pipe(filterServer)
-    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].rootHashed + paths.server))
-    .pipe(filterServer.restore())
-    .pipe(filterClient)
+var revAllOptions = {
+  transformFilename: function (file, hash) {
+    var ext = path.extname(file.path);
+    if (file.path.indexOf(paths.serverEntry) != -1) {
+      return path.basename(file.path, ext) + ext;
+    } else {
+      return path.basename(file.path, ext) + '.' + hash.substr(0, 8) + ext;
+    }
+  }
+};
+
+var revAllSrc = {
+  client: paths.dst[process.env.NODE_ENV].root + paths.client + '/**/*',
+  server: paths.dst[process.env.NODE_ENV].root + paths.server + '/**/*'
+};
+
+gulp.task('hash:client', function () {
+  return gulp.src(revAllSrc.client)
+    .pipe($.revAll(revAllOptions))
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].rootHashed + paths.client));
+});
+
+gulp.task('hash:server', function () {
+  return gulp.src(revAllSrc.server)
+    .pipe($.revAll(revAllOptions))
+    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].rootHashed + paths.server));
+});
+
+gulp.task('hash', function (callback) {
+  // these 2 should be run sequentially as gulp-rev-all seems to keep state
+  // between runs and this leads to a nice effect of revisioning client
+  // assets in server files but may disappear any moment
+  // https://github.com/smysnk/gulp-rev-all/issues/28
+  runSequence('hash:client', 'hash:server', callback)
 });
 
 require('coffee-script/register');

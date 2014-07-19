@@ -38,7 +38,7 @@
     "gulp-mocha": "kompot/gulp-mocha",
     "gulp-react": "^0.4.0",
     "gulp-rename": "^1.2.0",
-    "gulp-rev-all": "kompot/gulp-rev-all",
+    "gulp-rev-all": "^0.5.11",
     "gulp-rimraf": "^0.1.0",
     "gulp-stylus": "^1.0.5",
     "gulp-traceur": "^0.8.0",
