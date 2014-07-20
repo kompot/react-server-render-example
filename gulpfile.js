@@ -132,8 +132,9 @@ gulp.task('hash:server', function () {
 });
 
 gulp.task('hash', function (callback) {
-  // these 2 should be run sequentially as gulp-rev-all seems to keep state
-  // between runs and this leads to a nice effect of revisioning client
+  // these 2 should be run sequentially as gulp-rev-all keeps state
+  // between runs (as we share options between tasks and gulp-rev-all stores
+  // state in there) and this leads to a nice effect of revisioning client
   // assets in server files but may disappear any moment
   // https://github.com/smysnk/gulp-rev-all/issues/28
   runSequence('hash:client', 'hash:server', callback)
