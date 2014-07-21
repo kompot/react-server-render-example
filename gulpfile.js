@@ -33,8 +33,14 @@ gulp.task('stylus', function () {
   return gulp.src(paths.src.cssCompile)
     .pipe($.stylus(stylusConfig))
     .on('error', $.util.log)
-    .pipe($.autoprefixer())
+    .pipe($.autoprefixer(["last 1 version", "> 1%", "ie 8", "ie 7"]))
     .pipe(process.env.NODE_ENV === 'production' ? $.csso() : $.util.noop())
+    .pipe($.csso())
+    .pipe($.csslint({
+        'important': true,
+        'ids': true
+      }))
+    .pipe($.csslint.reporter())
     .pipe($.filesize())
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].css));
 });
