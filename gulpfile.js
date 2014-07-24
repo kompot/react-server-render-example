@@ -12,7 +12,8 @@ var $ = require('gulp-load-plugins')({
 var webpack = require("webpack");
 var runSequence = require('run-sequence');
 var nib = require('nib');
-var stylusConfig = { use: [nib()] };
+var jeet = require('jeet');
+var stylusConfig = { use: [nib(), jeet()] };
 var paths = require('./gulppaths.js');
 var pagespeed = require('psi');
 var ngrok = require('ngrok');
@@ -35,7 +36,6 @@ gulp.task('stylus', function () {
     .on('error', $.util.log)
     .pipe($.autoprefixer(["last 1 version", "> 1%", "ie 8", "ie 7"]))
     .pipe(process.env.NODE_ENV === 'production' ? $.csso() : $.util.noop())
-    .pipe($.csso())
     .pipe($.csslint({
         'important': true,
         'ids': true
@@ -76,7 +76,8 @@ var webpackConfig = {
   },
   module: {
     loaders: [
-      {test: /\.jsx?$/, loader: "envify-loader!jsx-loader?harmony"}
+      {test: /\.jsx?$/, loader: "envify-loader!jsx-loader?harmony"},
+      {test: /\.json$/, loader: "json-loader"}
     ]
   },
   plugins: [
@@ -149,6 +150,8 @@ gulp.task('hash', function (callback) {
 require('coffee-script/register');
 
 gulp.task('test:private', function (callback) {
+  // seems like there's an issue with Mocha that requires explicit callback
+  // wait for https://github.com/visionmedia/mocha/issues/1276 to be resolved
   gulp.src(paths.tst.root, { read: false })
       .pipe($.mocha({
         reporter: 'spec',
