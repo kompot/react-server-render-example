@@ -78,12 +78,17 @@ Router.prototype.navigate = function(path) {
 };
 
 Router.prototype.attach = function(app) {
+//  in React 0.10 it was
+//  ReactComponent.isValidComponent(app)
+//  in 0.11 it is
+//  React.isValidComponent(app._descriptor)
+//  is it required still?
 
-  invariant(
-    ReactComponent.isValidComponent(app),
-    "Router#attach arg should be React component, %s given",
-    typeof popup
-  );
+//  invariant(
+//    React.isValidComponent(app._descriptor),
+//    "Router#attach arg should be React component, %s given",
+//    typeof app
+//  );
 
   this.app = app;
   var self = this;
