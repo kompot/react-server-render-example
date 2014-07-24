@@ -1,11 +1,22 @@
 @require "nib/reset"
+@require "jeet"
 
-global-reset()
+/*edit()*/
+/*global-reset()*/
 
 body {
   > header {
+    col(3/3)
     background: #eee;
     padding: 4px 8px;
+
+    .project-title {
+      col(2/3)
+    }
+
+    .login {
+      col(1/3)
+    }
   }
 }
 
@@ -46,3 +57,4 @@ body {
 @require "./preloader"
 @require "./grid"
 @require "./popup"
+@require "./form"
