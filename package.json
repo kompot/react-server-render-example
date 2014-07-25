@@ -4,11 +4,6 @@
   "description": "",
   "main": "index.js",
   "repository": "http://github.com/barbuza/react-server-render-example",
-  "scripts": {
-    "test": "make lint",
-    "postinstall": "make clean prod_style prod_bundle",
-    "build-and-run": "node_modules/.bin/gulp build && export NODE_STATIC_DIR=./prod-hashed/client && node prod-hashed/server/js/server/server-gulp.*.js"
-  },
   "author": "Victor Kotseruba <barbuzaster@gmail.com>",
   "license": "MIT",
   "engines": {
@@ -16,13 +11,17 @@
     "npm": "1.4.15"
   },
   "dependencies": {
-    "express": "^4.6.1"
+    "body-parser": "^1.5.0",
+    "cookie-parser": "^1.3.2",
+    "express": "^4.6.1",
+    "fluxxor": "^1.3.2",
+    "tv4": "^1.1.0"
   },
   "devDependencies": {
     "autoprefixer-stylus": "^0.2.0",
     "chai": "^1.9.1",
     "chai-as-promised": "^4.1.1",
-    "chai-webdriver": "^0.9.0",
+    "chai-webdriver": "^0.9.1",
     "coffee-script": "^1.7.1",
     "compression": "^1.0.9",
     "envify-loader": "^0.1.0",
@@ -46,10 +45,12 @@
     "gulp-uglify": "^0.3.1",
     "gulp-util": "^3.0.0",
     "gulp-webpack": "^0.1.0",
+    "jeet": "^5.3.0",
+    "json-loader": "^0.5.1",
     "jsx-loader": "^0.11.0",
     "jsxhint": "^0.4.14",
     "lodash": "^2.4.1",
-    "mocha": "^1.20.1",
+    "mocha": "^1.21.0",
     "morgan": "^1.2.0",
     "ngrok": "^0.1.97",
     "nib": "^1.0.3",
@@ -58,11 +59,11 @@
     "react": "^0.11.0",
     "run-sequence": "^0.3.6",
     "selenium-webdriver": "^2.42.1",
-    "stylus": "^0.47.2",
+    "stylus": "^0.47.3",
     "superagent": "^0.18.2",
     "supervisor": "^0.6.0",
     "webdriver-sizzle": "0.0.6",
-    "webpack": "^1.3.2-beta3",
+    "webpack": "^1.3.2-beta6",
     "xregexp": "^2.0.0"
   }
 }

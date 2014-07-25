@@ -4,6 +4,7 @@ var fs = require("fs");
 var path = require("path");
 var morgan = require("morgan");
 var compression = require("compression");
+var schemaValidator = require('./schema-validator');
 
 require("node-jsx").install({extension: ".jsx", harmony: true});
 
@@ -17,7 +18,10 @@ console.log('process.env.NODE_STATIC_DIR ', process.env.NODE_STATIC_DIR);
 var staticFolder = process.env.NODE_STATIC_DIR || (path.join(process.cwd(), require('../../../gulppaths').dst.development.root, require('../../../gulppaths').client));
 console.log('staticFolder ', staticFolder);
 app.use(express.static(staticFolder));
-
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(morgan("short"));
 
 app.get("/riak/*", function(req, res, next) {
@@ -64,6 +68,31 @@ app.get("/riak/*", function(req, res, next) {
   }
 });
 
+app.post('/api/auth', function(req, res) {
+  if (schemaValidator.validate(req, res, require('../../json-schema/auth-user.json'))) {
+    console.log('req.body', req.body);
+    if (req.body) {
+      console.log('login    ' + req.body.login);
+      console.log('password ' + req.body.password);
+    }
+    res.cookie("session", "session-" + req.body.login);
+    res.send({
+      "success": true,
+      "data": {
+        "session-id": "session-" + req.body.login
+      }
+    });
+  }
+});
+
+app.delete('/api/auth', function(req, res) {
+  res.clearCookie('session');
+  res.send({
+    "success": true,
+    "message": "Cookie deleted."
+  })
+});
+
 app.get("/*", function(req, res, next) {
   ReactRouter.getProps(req.path).then(function(data) {
     var component = ReactApp({
@@ -73,7 +102,8 @@ app.get("/*", function(req, res, next) {
       cssPath: "/css/app.css",
       pageType: data.pageType,
       pageData: data.pageData,
-      locked: false
+      locked: false,
+      session: req.cookies && req.cookies.session
     });
     var html = "<!doctype html>\n" + React.renderComponentToString(component);
     var statusCode = data.pageType === Const.NOT_FOUND ? 404 : 200;

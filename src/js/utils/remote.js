@@ -42,6 +42,22 @@ if (typeof window === "undefined") {
     });
   };
 
+  Remote.prototype.post = function(uri, data) {
+    return new Promise(function(resolve, reject) {
+      logging.info("client posting", uri);
+      superagent
+        .post(uri)
+        .send(data)
+        .end(function(response) {
+          if (response.ok) {
+            resolve(response.body);
+          } else {
+            reject();
+          }
+        });
+    });
+  };
+
 }
 
 module.exports = new Remote();

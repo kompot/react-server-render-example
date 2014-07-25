@@ -1,0 +1,16 @@
+{
+  "title": "Auth user",
+  "type": "object",
+  "properties": {
+    "login": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    },
+    "rememberMe": {
+      "type": "boolean"
+    }
+  },
+  "required": ["login", "password"]
+}

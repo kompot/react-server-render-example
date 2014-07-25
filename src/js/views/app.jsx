@@ -7,6 +7,7 @@ var Element = require("./element.jsx");
 var Preloader = require("../components/preloader.jsx");
 var NotFound = require("./not-found.jsx");
 var dispatch = require("../dispatch");
+var Login = require("./login.jsx");
 
 var PropTypes = React.PropTypes;
 
@@ -35,7 +36,34 @@ var Counter = React.createClass({
 
 });
 
+var Fluxxor = require("fluxxor");
+var flux = new Fluxxor.Flux(require('../flux/stores'), require('../flux/actions'));
+
+var FluxMixin = Fluxxor.FluxMixin(React);
+var FluxChildMixin = Fluxxor.FluxChildMixin(React);
+var StoreWatchMixin = Fluxxor.StoreWatchMixin;
+
+var CurrentUser = React.createClass({
+  mixins: [FluxChildMixin, StoreWatchMixin("UserStore")],
+  getStateFromFlux: function() {
+    return flux.store("UserStore").getState();
+  },
+  render: function() {
+    if (this.state.loggedIn) {
+      return (
+        <span style={{marginLeft: "20px"}}>
+          Current user {this.state.userName}
+        </span>
+      );
+    } else {
+      return null;
+    }
+  }
+
+});
+
 var App = React.createClass({
+  mixins: [FluxMixin],
 
   propTypes: {
     path: PropTypes.string.isRequired,
@@ -44,7 +72,14 @@ var App = React.createClass({
     cssPath: PropTypes.string.isRequired,
     pageType: PropTypes.string.isRequired,
     pageData: PropTypes.object.isRequired,
-    locked: PropTypes.bool.isRequired
+    locked: PropTypes.bool.isRequired,
+    session: PropTypes.string
+  },
+
+  getDefaultProps: function () {
+    return {
+      flux: flux
+    }
   },
 
   getInitialState: function() {
@@ -114,8 +149,14 @@ var App = React.createClass({
         </head>
         <body>
           <header>
-            react server render demo
-            <Counter />
+            <div className="project-title">
+              react server render demo
+              <Counter />
+              <CurrentUser />
+            </div>
+            <div className="login">
+              <Login session={this.props.session} />
+            </div>
           </header>
           <section id="workspace">
             {Page(this.props.pageData)}
