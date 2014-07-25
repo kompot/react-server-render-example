@@ -62,6 +62,10 @@ gulp.task('copy:server', function () {
 
 var webpackConfig = {
   cache: true,
+  // watch does not work because of
+  // https://github.com/shama/gulp-webpack/pull/4
+  // build takes 4-5s instead of 100ms incremental builds
+  //  watch: true,
   devtool: "source-map",
   entry: {
     entry: "./src/js/views/entry",
@@ -258,6 +262,6 @@ gulp.task('default', function (callback) {
     ['lint:js', 'stylus', 'webpack', 'copy:server'],
     'fb-flo', 'http', callback);
   gulp.watch(paths.src.cssWatch,    ['stylus']);
-  gulp.watch(paths.src.jsWatch,     ['lint:js', 'webpack', 'http']);
+  gulp.watch(paths.src.jsWatch,     ['lint:js', 'http']);
 });
 
