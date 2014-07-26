@@ -44,7 +44,7 @@
     "gulp-traceur": "^0.8.0",
     "gulp-uglify": "^0.3.1",
     "gulp-util": "^3.0.0",
-    "gulp-webpack": "^0.1.0",
+    "gulp-webpack": "kompot/gulp-webpack",
     "jeet": "^5.3.0",
     "json-loader": "^0.5.1",
     "jsx-loader": "^0.11.0",
