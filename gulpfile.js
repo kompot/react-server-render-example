@@ -61,13 +61,17 @@ gulp.task('copy:server', function () {
 });
 
 var webpackConfig = {
+  stats: {
+    timings: true,
+  },
   cache: true,
   devtool: "source-map",
   watch: true,
   watchDelay: 50,
+  progress: true,
   entry: {
-    entry: "./src/js/views/entry",
-    fake: "./src/js/webpack-common"
+    entry: "./src/js/views/entry.jsx",
+    fake: "./src/js/webpack-common.js"
   },
   output: {
     path: path.join(__dirname, paths.dst[process.env.NODE_ENV].root),
@@ -103,6 +107,7 @@ gulp.task('lint:js', function() {
 gulp.task('webpack', function() {
   if (process.env.NODE_ENV === 'production') {
     delete webpackConfig.devtool;
+    delete webpackConfig.watch;
   }
   return gulp.src(paths.src.js)
     .pipe($.webpack(webpackConfig, webpack))
@@ -260,6 +265,6 @@ gulp.task('default', function (callback) {
     ['lint:js', 'stylus', 'webpack', 'copy:server'],
     'fb-flo', 'http', callback);
   gulp.watch(paths.src.cssWatch,    ['stylus']);
-  gulp.watch(paths.src.jsWatch,     ['webpack', 'http']);
+  gulp.watch(paths.src.jsWatch,     ['http']);
 });
 
