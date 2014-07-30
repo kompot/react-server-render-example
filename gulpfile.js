@@ -14,7 +14,7 @@ var runSequence = require('run-sequence');
 var nib = require('nib');
 var jeet = require('jeet');
 var stylusConfig = { use: [nib(), jeet()] };
-var paths = require('./gulppaths.js');
+var paths = require('./gulppaths');
 var pagespeed = require('psi');
 var ngrok = require('ngrok');
 
@@ -30,6 +30,9 @@ var implicitEnv = implicitEnvsByTask[task] ? implicitEnvsByTask[task] : 'develop
 process.env.NODE_ENV = process.env.NODE_ENV || implicitEnv;
 $.util.log('Environment is `' + process.env.NODE_ENV + '`.');
 
+// should this be dropped completely in favour of Webpack
+// and inlining just critical path CSS with something like
+// https://github.com/pocketjoso/penthouse
 gulp.task('stylus', function () {
   return gulp.src(paths.src.cssCompile)
     .pipe($.stylus(stylusConfig))
@@ -60,38 +63,6 @@ gulp.task('copy:server', function () {
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].jsServer));
 });
 
-var webpackConfig = {
-  stats: {
-    timings: true,
-  },
-  cache: true,
-  devtool: "source-map",
-  watch: true,
-  watchDelay: 50,
-  progress: true,
-  entry: {
-    entry: "./src/js/views/entry.jsx",
-    fake: "./src/js/webpack-common.js"
-  },
-  output: {
-    path: path.join(__dirname, paths.dst[process.env.NODE_ENV].root),
-    filename: "[name].bundle.js"
-  },
-  resolve: {
-    extensions: ["", ".js", ".jsx"]
-  },
-  module: {
-    loaders: [
-      {test: /\.jsx?$/, loader: "envify-loader!jsx-loader?harmony"},
-      {test: /\.json$/, loader: "json-loader"}
-    ]
-  },
-  plugins: [
-    new webpack.optimize.CommonsChunkPlugin("common.bundle.js"),
-    new webpack.optimize.OccurenceOrderPlugin(true)
-  ]
-};
-
 gulp.task('lint:js', function() {
   // not async
   // http://stackoverflow.com/questions/21699146/gulp-js-task-return-on-src
@@ -105,12 +76,9 @@ gulp.task('lint:js', function() {
 });
 
 gulp.task('webpack', function() {
-  if (process.env.NODE_ENV === 'production') {
-    delete webpackConfig.devtool;
-    delete webpackConfig.watch;
-  }
+  var config = require('./webpack.config')[process.env.NODE_ENV];
   return gulp.src(paths.src.js)
-    .pipe($.webpack(webpackConfig, webpack))
+    .pipe($.webpack(config, webpack))
     .pipe(process.env.NODE_ENV === 'production' ? $.uglify() : $.util.noop())
 //    .pipe($.rename(webpackPrefix + '.js'))
     .pipe($.filesize())
@@ -196,28 +164,6 @@ gulp.task('http:kill', function (callback) {
   callback()
 });
 
-gulp.task('fb-flo', function () {
-  var flo = require('fb-flo');
-  var fs = require('fs');
-
-  var server = flo(paths.dst.development.rootClient, {
-      port: 8888,
-      host: '127.0.0.1',
-      glob: [ '**/*.js', '**/*.css' ]
-    }, function resolver(filepath, callback) {
-      callback({
-        resourceURL: filepath,
-        contents: fs.readFileSync(path.join(paths.dst.development.rootClient, filepath)),
-        reload: false
-      });
-    }
-  );
-
-  server.once('ready', function() {
-    $.util.log('Hot reloading js/css with `fb-flo` started.');
-  });
-});
-
 gulp.task('pagespeed:ngrok', function (callback) {
   ngrok.connect(8080, function(err, url) {
     if (err) {
@@ -262,9 +208,8 @@ gulp.task('pagespeed', function (callback) {
 
 gulp.task('default', function (callback) {
   runSequence('clean',
-    ['lint:js', 'stylus', 'webpack', 'copy:server'],
-    'fb-flo', 'http', callback);
+    ['copy:server'],
+    'http', callback);
   gulp.watch(paths.src.cssWatch,    ['stylus']);
-  gulp.watch(paths.src.jsWatch,     ['http']);
 });
 

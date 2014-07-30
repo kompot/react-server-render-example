@@ -93,13 +93,14 @@ app.delete('/api/auth', function(req, res) {
   })
 });
 
+var devServerHost = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '';
+
 app.get("/*", function(req, res, next) {
   ReactRouter.getProps(req.path).then(function(data) {
     var component = ReactApp({
       path: req.path,
-      entryBundlePath: "/js/entry.bundle.js",
-      commonBundlePath: "/js/common.bundle.js",
-      cssPath: "/css/app.css",
+      entryBundlePath: devServerHost + "/js/entry.bundle.js",
+      commonBundlePath: devServerHost + "/js/common.bundle.js",
       pageType: data.pageType,
       pageData: data.pageData,
       locked: false,
@@ -118,3 +119,26 @@ var port = parseInt(process.env.PORT || 8080);
 app.listen(port, function() {
   console.log("serving on port " + port);
 });
+
+if (devServerHost) {
+  var webpack = require('webpack');
+  var WebpackDevServer = require('webpack-dev-server');
+  var config = require('../../../webpack.config').development;
+
+  app.all('*', function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', devServerHost);
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+    next();
+  });
+
+  new WebpackDevServer(webpack(config), {
+    publicPath: devServerHost + '/js/',
+    contentBase: 'http://localhost:8080',
+    hot: true
+  }).listen(3000, 'localhost', function (err, result) {
+    if (err) {
+      console.log(err);
+    }
+    console.log('Webpack listening at localhost:3000');
+  });
+}

@@ -1,5 +1,7 @@
 /** @jsx React.DOM */
 
+require("../../styles/app.styl");
+
 var React = require("react");
 var ReactMount = require("react/lib/ReactMount");
 ReactMount.allowFullPageRender = true;

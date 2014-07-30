@@ -37,7 +37,8 @@ var Counter = React.createClass({
 });
 
 var Fluxxor = require("fluxxor");
-var flux = new Fluxxor.Flux(require('../flux/stores'), require('../flux/actions'));
+// gulp-rev-all seems to dislike this particular link all of a sudden
+var flux = new Fluxxor.Flux(require('../flux/stores.js'), require('../flux/actions'));
 
 var FluxMixin = Fluxxor.FluxMixin(React);
 var FluxChildMixin = Fluxxor.FluxChildMixin(React);
@@ -69,7 +70,6 @@ var App = React.createClass({
     path: PropTypes.string.isRequired,
     entryBundlePath: PropTypes.string.isRequired,
     commonBundlePath: PropTypes.string.isRequired,
-    cssPath: PropTypes.string.isRequired,
     pageType: PropTypes.string.isRequired,
     pageData: PropTypes.object.isRequired,
     locked: PropTypes.bool.isRequired,
@@ -112,7 +112,6 @@ var App = React.createClass({
       path: this.props.path,
       entryBundlePath: this.props.entryBundlePath,
       commonBundlePath: this.props.commonBundlePath,
-      cssPath: this.props.cssPath,
       pageType: this.props.pageType,
       pageData: this.props.pageData,
       locked: this.props.locked
@@ -145,7 +144,6 @@ var App = React.createClass({
           <meta charSet="utf-8" />
           <title>node render</title>
           <link href="http://fonts.googleapis.com/css?family=Open+Sans:400&subset=latin,cyrillic" rel="stylesheet" type="text/css" />
-          <link href={this.props.cssPath} type="text/css" rel="stylesheet" />
         </head>
         <body>
           <header>
