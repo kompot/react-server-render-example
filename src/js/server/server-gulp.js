@@ -112,12 +112,7 @@ app.get("/*", function(req, res, next) {
       "Content-Type": "text/html"
     });
     res.end(html);
-  }, next).catch(function(err) {
-    console.log(err.stack);
-    res.write('<h1>500 error</h1>');
-    res.write(err.stack.replace(/\n/g, '<br>'));
-    res.end();
-  });
+  }, next).catch(next);
 });
 
 var port = parseInt(process.env.PORT || 8080);
