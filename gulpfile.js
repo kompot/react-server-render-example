@@ -76,10 +76,10 @@ gulp.task('lint:js', function() {
 });
 
 gulp.task('webpack', function() {
-  var config = require('./webpack.config')[process.env.NODE_ENV];
+  var config = require('./webpack.config');
   return gulp.src(paths.src.js)
     .pipe($.webpack(config, webpack))
-    .pipe(process.env.NODE_ENV === 'production' ? $.uglify() : $.util.noop())
+//    .pipe(process.env.NODE_ENV === 'production' ? $.uglify() : $.util.noop())
 //    .pipe($.rename(webpackPrefix + '.js'))
     .pipe($.filesize())
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].js));

@@ -68,6 +68,7 @@ var App = React.createClass({
 
   propTypes: {
     path: PropTypes.string.isRequired,
+    cssPath: PropTypes.string.isRequired,
     entryBundlePath: PropTypes.string.isRequired,
     commonBundlePath: PropTypes.string.isRequired,
     pageType: PropTypes.string.isRequired,
@@ -110,6 +111,7 @@ var App = React.createClass({
 
     var injectConfig = "window.appProps=" + JSON.stringify({
       path: this.props.path,
+      cssPath: this.props.cssPath,
       entryBundlePath: this.props.entryBundlePath,
       commonBundlePath: this.props.commonBundlePath,
       pageType: this.props.pageType,
@@ -144,6 +146,7 @@ var App = React.createClass({
           <meta charSet="utf-8" />
           <title>node render</title>
           <link href="http://fonts.googleapis.com/css?family=Open+Sans:400&subset=latin,cyrillic" rel="stylesheet" type="text/css" />
+          <link href={this.props.cssPath} rel="stylesheet" type="text/css" />
         </head>
         <body>
           <header>

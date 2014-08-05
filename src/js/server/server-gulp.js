@@ -99,6 +99,7 @@ app.get("/*", function(req, res, next) {
   ReactRouter.getProps(req.path).then(function(data) {
     var component = ReactApp({
       path: req.path,
+      cssPath: '/js/entry.css',
       entryBundlePath: devServerHost + "/js/entry.bundle.js",
       commonBundlePath: devServerHost + "/js/common.bundle.js",
       pageType: data.pageType,
@@ -123,7 +124,7 @@ app.listen(port, function() {
 if (devServerHost) {
   var webpack = require('webpack');
   var WebpackDevServer = require('webpack-dev-server');
-  var config = require('../../../webpack.config').development;
+  var config = require('../../../webpack.config');
 
   app.all('*', function(req, res, next) {
     res.header('Access-Control-Allow-Origin', devServerHost);
@@ -134,7 +135,16 @@ if (devServerHost) {
   new WebpackDevServer(webpack(config), {
     publicPath: devServerHost + '/js/',
     contentBase: 'http://localhost:8080',
-    hot: true
+    hot: true,
+    stats: {
+      colors: true,
+      assets: true,
+      timings: true,
+      chunks: false,
+      chunkModules: false,
+      modules: false, // set to true to get debug info on each file
+      children: false
+    }
   }).listen(3000, 'localhost', function (err, result) {
     if (err) {
       console.log(err);
