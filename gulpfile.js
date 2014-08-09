@@ -13,7 +13,6 @@ var webpack = require("webpack");
 var runSequence = require('run-sequence');
 var nib = require('nib');
 var jeet = require('jeet');
-var stylusConfig = { use: [nib(), jeet()] };
 var paths = require('./gulppaths');
 var pagespeed = require('psi');
 var ngrok = require('ngrok');
@@ -28,39 +27,36 @@ var implicitEnvsByTask = {
 var task = $.util.env._[0];
 var implicitEnv = implicitEnvsByTask[task] ? implicitEnvsByTask[task] : 'development';
 process.env.NODE_ENV = process.env.NODE_ENV || implicitEnv;
+process.env.NODE_ENV_MODIFIER = process.env.NODE_ENV === 'production' ? 'Hashed' : '';
 $.util.log('Environment is `' + process.env.NODE_ENV + '`.');
 
 // should this be dropped completely in favour of Webpack
 // and inlining just critical path CSS with something like
 // https://github.com/pocketjoso/penthouse
-gulp.task('stylus', function () {
+gulp.task('lint:css', function () {
   return gulp.src(paths.src.cssCompile)
-    .pipe($.stylus(stylusConfig))
+    .pipe($.stylus({ use: [nib(), jeet()] }))
     .on('error', $.util.log)
-    .pipe($.autoprefixer(["last 1 version", "> 1%", "ie 8", "ie 7"]))
-    .pipe(process.env.NODE_ENV === 'production' ? $.csso() : $.util.noop())
+    // make this line shared with webpack config if this task is still relevant
+    .pipe($.autoprefixer(["last 2 version", "> 1%"]))
+    .pipe($.csso())
     .pipe($.csslint({
         'important': true,
         'ids': true
       }))
     .pipe($.csslint.reporter())
-    .pipe($.filesize())
-    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].css));
+//    .pipe($.filesize())
+//    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].css));
 });
 
 gulp.task('clean', function () {
-  var pathsToClean = [paths.dst[process.env.NODE_ENV].root];
-  if (process.env.NODE_ENV === 'production') {
-    pathsToClean.push(paths.dst[process.env.NODE_ENV].rootHashed);
-  }
+  var pathsToClean = [
+    paths.dst[process.env.NODE_ENV].root,
+    paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].root
+  ];
   return gulp.src(pathsToClean, { read: false })
     .pipe($.rimraf())
     .on('error', $.util.log);
-});
-
-gulp.task('copy:server', function () {
-  return gulp.src(paths.src.jsWatch)
-    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].jsServer));
 });
 
 gulp.task('lint:js', function() {
@@ -75,7 +71,7 @@ gulp.task('lint:js', function() {
     .pipe(process.env.NODE_ENV === 'production' ? $.eslint.failOnError() : $.util.noop());
 });
 
-gulp.task('webpack', function() {
+gulp.task('webpack:client', function() {
   var config = require('./webpack.config');
   return gulp.src(paths.src.js)
     .pipe($.webpack(config, webpack))
@@ -83,6 +79,16 @@ gulp.task('webpack', function() {
 //    .pipe($.rename(webpackPrefix + '.js'))
     .pipe($.filesize())
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].js));
+});
+
+gulp.task('webpack:server', function() {
+  var config = require('./webpack.config.server');
+  return gulp.src(paths.src.js)
+    .pipe($.webpack(config, webpack))
+//    .pipe(process.env.NODE_ENV === 'production' ? $.uglify() : $.util.noop())
+//    .pipe($.rename(webpackPrefix + '.js'))
+    .pipe($.filesize())
+    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].jsServer));
 });
 
 var revAllOptions = {
@@ -97,20 +103,20 @@ var revAllOptions = {
 };
 
 var revAllSrc = {
-  client: paths.dst[process.env.NODE_ENV].root + paths.client + '/**/*',
-  server: paths.dst[process.env.NODE_ENV].root + paths.server + '/**/*'
+  client: paths.dst[process.env.NODE_ENV].rootClient + '/**/*',
+  server: paths.dst[process.env.NODE_ENV].rootServer + '/**/*'
 };
 
 gulp.task('hash:client', function () {
   return gulp.src(revAllSrc.client)
     .pipe($.revAll(revAllOptions))
-    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].rootHashed + paths.client));
+    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].rootClient));
 });
 
 gulp.task('hash:server', function () {
   return gulp.src(revAllSrc.server)
     .pipe($.revAll(revAllOptions))
-    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].rootHashed + paths.server));
+    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].rootServer));
 });
 
 gulp.task('hash', function (callback) {
@@ -140,16 +146,22 @@ gulp.task('http', function (callback) {
   if (httpServer) {
     httpServer.kill('SIGTERM');
   }
-  // TODO optimize paths, think about hashed as a separate environment
-  var entryPoint = process.env.NODE_ENV === 'production' ?
-      paths.dst.production.rootHashedServer + '/js' + paths.serverEntry :
-      paths.src.js + paths.serverEntry;
-  if (process.env.NODE_ENV === 'production') {
-    process.env.NODE_STATIC_DIR = paths.dst.production.rootHashedClient
-  } else {
-    delete process.env.NODE_STATIC_DIR;
+  var entryPoint = paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].jsServer + paths.serverEntry
+  process.env.NODE_STATIC_DIR = paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].rootClient
+  httpServer = spawn('node', [entryPoint], {stdio: 'inherit'});
+  setTimeout(function () {
+    // some delay to let node start up before reporting it's up
+    // should be replaced with a real watcher
+    callback()
+  }, 100);
+});
+
+var httpWebpackServer;
+gulp.task('http:webpack', function (callback) {
+  if (httpWebpackServer) {
+    httpWebpackServer.kill('SIGTERM');
   }
-  httpServer = spawn('node', ['--harmony', entryPoint], {stdio: 'inherit'});
+  httpWebpackServer = spawn('node', ['./webpack.devserver.js'], {stdio: 'inherit'});
   setTimeout(function () {
     // some delay to let node start up before reporting it's up
     // should be replaced with a real watcher
@@ -160,6 +172,13 @@ gulp.task('http', function (callback) {
 gulp.task('http:kill', function (callback) {
   if (httpServer) {
     httpServer.kill('SIGTERM');
+  }
+  callback()
+});
+
+gulp.task('http:webpack:kill', function (callback) {
+  if (httpWebpackServer) {
+    httpWebpackServer.kill('SIGTERM');
   }
   callback()
 });
@@ -188,10 +207,7 @@ gulp.task('pagespeed:private', function(callback) {
 });
 
 gulp.task('build', function (callback) {
-  runSequence('clean', 'lint:js',
-    ['stylus', 'webpack', 'copy:server'],
-    'hash',
-    callback);
+  runSequence('clean', 'lint:js', 'webpack:client', 'webpack:server', 'hash', callback);
 });
 
 gulp.task('run', function (callback) {
@@ -207,9 +223,9 @@ gulp.task('pagespeed', function (callback) {
 });
 
 gulp.task('default', function (callback) {
-  runSequence('clean',
-    ['copy:server'],
-    'http', callback);
-  gulp.watch(paths.src.cssWatch,    ['stylus']);
+  runSequence('clean', 'http:webpack', 'webpack:server', callback);
+  gulp.watch(paths.src.jsWatch, ['http:kill']);
+  var entryPoint = paths.dst[process.env.NODE_ENV].jsServer + paths.serverEntry
+  gulp.watch(entryPoint, ['http']);
 });
 

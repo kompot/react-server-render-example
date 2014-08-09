@@ -7,9 +7,9 @@ var jeet = require('jeet');
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 var baseConfig = {
+  // disable source maps to increase compilation speed significantly
   devtool: 'source-map',
   progress: true,
-  allChunks: true,
   entry: {
     entry: [
       'webpack-dev-server/client?http://localhost:3000',
@@ -19,7 +19,7 @@ var baseConfig = {
     fake: ['./src/js/fake.js']
   },
   output: {
-    path: path.join(__dirname, (paths.dst[process.env.NODE_ENV] && paths.dst[process.env.NODE_ENV].root) || './dev-gulp'),
+    path: path.join(__dirname, (paths.dst[process.env.NODE_ENV] && paths.dst[process.env.NODE_ENV].root) || './dev'),
     publicPath: 'http://localhost:3000/js/',
     filename: '[name].bundle.js',
     chunkFilename: "[hash]/js/[id].js",
@@ -46,9 +46,12 @@ var baseConfig = {
           'stylus'
         ]
       },
-      { test: /\.jsx$/, loaders: ['react-hot', 'envify', 'jsx?harmony'] },
+      { test: /\.jsx$/, loaders: ['react-hot', 'jsx?harmony'] },
       { test: /\.json$/, loader: 'json' }
-    ]
+    ],
+    postLoaders: [{
+      loader: "transform?envify"
+    }]
   },
   plugins: [
     // plugins managed afterwards, insert with caution
@@ -63,6 +66,8 @@ var baseConfig = {
 
 if (process.env.NODE_ENV === 'production') {
   for (var entry in baseConfig.entry) {
+    // TODO add webpack modules for dev environment instead of removing
+    // for production
     baseConfig.entry[entry] = _.compact(_.map(baseConfig.entry[entry], function (e) {
       if (!(e.indexOf('webpack') === 0)) {
         return e;

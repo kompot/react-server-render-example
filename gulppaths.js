@@ -1,18 +1,18 @@
 var srcPath       = './src';
 var dstProdPath   = './prod';
-var dstDevPath    = './dev-gulp';
+var dstDevPath    = './dev';
 var dstHashPath   = '-hashed';
 var client        = '/client';
 var server        = '/server';
 
 module.exports = {
-  serverEntry:   '/server/server-gulp.js',
+  serverEntry:   '/server.js',
   webpackPrefix: 'bundle',
   client:        client,
   server:        server,
   src: {
-    css:         srcPath + '/styles',
-    cssWatch:    srcPath + '/styles/**/*',
+//    css:         srcPath + '/styles',
+//    cssWatch:    srcPath + '/styles/**/*',
     cssCompile: [srcPath + '/styles/app.styl',
            '!' + srcPath + '/styles/_*.styl'],
     js:          srcPath + '/js',
@@ -23,18 +23,23 @@ module.exports = {
     development: {
       root:       dstDevPath,
       rootClient: dstDevPath + client,
-      css:        dstDevPath + client + '/css',
+      rootServer: dstDevPath + server,
       js:         dstDevPath + client + '/js',
       jsServer:   dstDevPath + server + '/js'
     },
     production: {
       root:       dstProdPath,
-      rootHashed: dstProdPath + dstHashPath,
-      rootHashedClient: dstProdPath + dstHashPath + client,
-      rootHashedServer: dstProdPath + dstHashPath + server,
-      css:        dstProdPath + client + '/css',
+      rootClient: dstProdPath + client,
+      rootServer: dstProdPath + server,
       js:         dstProdPath + client + '/js',
       jsServer:   dstProdPath + server + '/js'
+    },
+    productionHashed: {
+      root:       dstProdPath + dstHashPath,
+      rootClient: dstProdPath + dstHashPath + client,
+      rootServer: dstProdPath + dstHashPath + server,
+      js:         dstProdPath + dstHashPath + client + '/js',
+      jsServer:   dstProdPath + dstHashPath + server + '/js'
     }
   },
   tst: {

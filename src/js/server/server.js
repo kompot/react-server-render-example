@@ -3,10 +3,8 @@ var React = require("react");
 var fs = require("fs");
 var path = require("path");
 var morgan = require("morgan");
-var crypto = require("crypto");
 var compression = require("compression");
-
-require("node-jsx").install({extension: ".jsx", harmony: true});
+var schemaValidator = require('./schema-validator');
 
 var app = express();
 var ReactApp = require("../views/app.jsx");
@@ -14,25 +12,16 @@ var ReactRouter = require("../routes");
 var Const = require("../const");
 
 app.use(compression());
-app.use(express.static(path.join(__dirname, "/../../../dev")));
-
+console.log('process.env.NODE_STATIC_DIR ', process.env.NODE_STATIC_DIR);
+//var staticFolder = process.env.NODE_STATIC_DIR || (path.join(process.cwd(), require('../../../gulppaths').dst.development.root, require('../../../gulppaths').client));
+var staticFolder = process.env.NODE_STATIC_DIR;
+console.log('staticFolder ', staticFolder);
+app.use(express.static(staticFolder));
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(morgan("short"));
-
-var commonBundlePath = "/common.bundle.js";
-var entryBundlePath = "/entry.bundle.js";
-var bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(path.join(__dirname, "/../../../dev", commonBundlePath)));
-commonBundlePath += "?" + bundleHash.digest("hex");
-
-bundleHash = crypto.createHash("sha1");
-bundleHash.update(fs.readFileSync(path.join(__dirname, "/../../../dev", entryBundlePath)));
-entryBundlePath += "?" + bundleHash.digest("hex");
-
-var cssPath = "/app.css";
-var cssBundleHash = crypto.createHash("sha1");
-cssBundleHash.update(fs.readFileSync(path.join(__dirname, "/../../../dev", cssPath)));
-cssPath += "?" + cssBundleHash.digest("hex");
-
 
 app.get("/riak/*", function(req, res, next) {
   if (req.path === "/riak/test/grid") {
@@ -78,16 +67,44 @@ app.get("/riak/*", function(req, res, next) {
   }
 });
 
+app.post('/api/auth', function(req, res) {
+  if (schemaValidator.validate(req, res, require('../../json-schema/auth-user.json'))) {
+    console.log('req.body', req.body);
+    if (req.body) {
+      console.log('login    ' + req.body.login);
+      console.log('password ' + req.body.password);
+    }
+    res.cookie("session", "session-" + req.body.login);
+    res.send({
+      "success": true,
+      "data": {
+        "session-id": "session-" + req.body.login
+      }
+    });
+  }
+});
+
+app.delete('/api/auth', function(req, res) {
+  res.clearCookie('session');
+  res.send({
+    "success": true,
+    "message": "Cookie deleted."
+  })
+});
+
+var devServerHost = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '';
+
 app.get("/*", function(req, res, next) {
   ReactRouter.getProps(req.path).then(function(data) {
     var component = ReactApp({
       path: req.path,
-      entryBundlePath: entryBundlePath,
-      commonBundlePath: commonBundlePath,
-      cssPath: cssPath,
+      cssPath: devServerHost + '/js/entry.css',
+      entryBundlePath: devServerHost + '/js/entry.bundle.js',
+      commonBundlePath: devServerHost + '/js/common.bundle.js',
       pageType: data.pageType,
       pageData: data.pageData,
-      locked: false
+      locked: false,
+      session: req.cookies && req.cookies.session
     });
     var html = "<!doctype html>\n" + React.renderComponentToString(component);
     var statusCode = data.pageType === Const.NOT_FOUND ? 404 : 200;
@@ -95,10 +112,18 @@ app.get("/*", function(req, res, next) {
       "Content-Type": "text/html"
     });
     res.end(html);
-  }, next);
+  }, next).catch(next);
 });
 
 var port = parseInt(process.env.PORT || 8080);
 app.listen(port, function() {
   console.log("serving on port " + port);
 });
+
+if (process.env.NODE_ENV === 'development') {
+  app.all('*', function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', devServerHost);
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+    next();
+  });
+}
