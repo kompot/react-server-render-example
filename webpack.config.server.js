@@ -3,6 +3,10 @@ var _ = require("lodash");
 var path = require('path');
 var paths = require('./gulppaths');
 
+// put here our those package.json dependencies
+// that should be packed into our server bundle
+var externalsExceptions = [];
+
 var baseConfig = {
 //  progress: true,
   entry: {
@@ -20,8 +24,10 @@ var baseConfig = {
     __dirname: true
   },
   output: {
-    filename: '[name].js'
+    filename: '[name].js',
+    libraryTarget: 'commonjs'
   },
+  externals: [],
   resolve: {
     extensions: ['', '.js', '.jsx', '.styl', '.css']
   },
@@ -42,5 +48,14 @@ var baseConfig = {
 if (process.env.NODE_ENV === 'production') {
   delete baseConfig.watch;
 }
+
+var allPackages = require('./package.json');
+function addToExternals (version, dep) {
+  if (!_.contains(externalsExceptions, dep)) {
+    baseConfig.externals.push(dep);
+  }
+}
+_.forOwn(allPackages.dependencies, addToExternals);
+_.forOwn(allPackages.devDependencies, addToExternals);
 
 module.exports = baseConfig;
