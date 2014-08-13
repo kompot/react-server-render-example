@@ -69,6 +69,7 @@ var App = React.createClass({
   propTypes: {
     path: PropTypes.string.isRequired,
     cssPath: PropTypes.string.isRequired,
+    cssInline: PropTypes.string,
     entryBundlePath: PropTypes.string.isRequired,
     commonBundlePath: PropTypes.string.isRequired,
     pageType: PropTypes.string.isRequired,
@@ -139,6 +140,16 @@ var App = React.createClass({
         </div>
       );
     }
+    var inlineCss = null;
+    if (this.props.cssInline) {
+      inlineCss = (
+        <style type="text/css" dangerouslySetInnerHTML={{__html: this.props.cssInline}} />
+      )
+    } else {
+      inlineCss = (
+          <link href={this.props.cssPath} rel="stylesheet" type="text/css" />
+      )
+    }
 
     return (
       <html>
@@ -146,7 +157,7 @@ var App = React.createClass({
           <meta charSet="utf-8" />
           <title>node render</title>
           <link href="http://fonts.googleapis.com/css?family=Open+Sans:400&subset=latin,cyrillic" rel="stylesheet" type="text/css" />
-          <link href={this.props.cssPath} rel="stylesheet" type="text/css" />
+          {inlineCss}
         </head>
         <body>
           <header>

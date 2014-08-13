@@ -1,4 +1,4 @@
-var Promise = require("es6-promise").Promise;
+var Promise = require("bluebird");
 var logging = require("../utils/logging");
 
 var browserCache = {};

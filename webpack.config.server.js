@@ -3,7 +3,7 @@ var _ = require("lodash");
 var path = require('path');
 var paths = require('./gulppaths');
 
-// put here our those package.json dependencies
+// put here those `package.json` dependencies
 // that should be packed into our server bundle
 var externalsExceptions = [];
 

@@ -7,8 +7,8 @@ var jeet = require('jeet');
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 var baseConfig = {
-  // disable source maps to increase compilation speed significantly
-  devtool: 'source-map',
+  // enabling source maps decreases compilation speed significantly
+//  devtool: 'source-map',
   progress: true,
   entry: {
     entry: [
@@ -36,11 +36,9 @@ var baseConfig = {
     loaders: [
       { test: /\.styl$/,
         loaders: [
+          ExtractTextPlugin.loader({remove: false, extract: false}),
           'style',
-          // extract CSS is disabled in dev mode as this plugin is not able
-          // to extract CSS and also leave it in the bundle
-          // and hot reloading stops working when CSS is not injected via JS
-          ExtractTextPlugin.extract(),
+          ExtractTextPlugin.loader({remove: false, extract: true}),
           'css',
           'autoprefixer?browsers=last 2 version,> 1%',
           'stylus'
@@ -77,12 +75,6 @@ if (process.env.NODE_ENV === 'production') {
   delete baseConfig.devtool;
   delete baseConfig.plugins[1];
 } else {
-  for (var i = 0; i < baseConfig.module.loaders.length; i++) {
-    if (baseConfig.module.loaders[i].test.test('.styl')) {
-      delete baseConfig.module.loaders[i].loaders[1];
-      baseConfig.module.loaders[i].loaders = _.compact(baseConfig.module.loaders[i].loaders);
-    }
-  }
   delete baseConfig.plugins[0];
 }
 baseConfig.plugins = _.compact(baseConfig.plugins);

@@ -75,8 +75,6 @@ gulp.task('webpack:client', function() {
   var config = require('./webpack.config');
   return gulp.src(paths.src.js)
     .pipe($.webpack(config, webpack))
-//    .pipe(process.env.NODE_ENV === 'production' ? $.uglify() : $.util.noop())
-//    .pipe($.rename(webpackPrefix + '.js'))
     .pipe($.filesize())
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].js));
 });
@@ -85,8 +83,6 @@ gulp.task('webpack:server', function() {
   var config = require('./webpack.config.server');
   return gulp.src(paths.src.js)
     .pipe($.webpack(config, webpack))
-//    .pipe(process.env.NODE_ENV === 'production' ? $.uglify() : $.util.noop())
-//    .pipe($.rename(webpackPrefix + '.js'))
     .pipe($.filesize())
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].jsServer));
 });
@@ -142,7 +138,7 @@ gulp.task('test:private', function (callback) {
 });
 
 var httpServer;
-gulp.task('http', function (callback) {
+gulp.task('http', ['http:kill'], function (callback) {
   if (httpServer) {
     httpServer.kill('SIGTERM');
   }
@@ -223,8 +219,9 @@ gulp.task('pagespeed', function (callback) {
 });
 
 gulp.task('default', function (callback) {
-  runSequence('clean', 'http:webpack', 'webpack:server', callback);
-  gulp.watch(paths.src.jsWatch, ['http:kill']);
+  // `webpack:client` is used only for generating critical path css (generated once per gulp run)
+  // as `http:webpack` provides dev-time client dependencies
+  runSequence('clean', 'http:webpack', ['webpack:client', 'webpack:server'], callback);
   var entryPoint = paths.dst[process.env.NODE_ENV].jsServer + paths.serverEntry
   gulp.watch(entryPoint, ['http']);
 });

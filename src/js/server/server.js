@@ -5,6 +5,8 @@ var path = require("path");
 var morgan = require("morgan");
 var compression = require("compression");
 var schemaValidator = require('./schema-validator');
+var Promise = require("bluebird");
+var criticalPath = require('./critical-path');
 
 var app = express();
 var ReactApp = require("../views/app.jsx");
@@ -13,7 +15,6 @@ var Const = require("../const");
 
 app.use(compression());
 console.log('process.env.NODE_STATIC_DIR ', process.env.NODE_STATIC_DIR);
-//var staticFolder = process.env.NODE_STATIC_DIR || (path.join(process.cwd(), require('../../../gulppaths').dst.development.root, require('../../../gulppaths').client));
 var staticFolder = process.env.NODE_STATIC_DIR;
 console.log('staticFolder ', staticFolder);
 app.use(express.static(staticFolder));
@@ -95,10 +96,17 @@ app.delete('/api/auth', function(req, res) {
 var devServerHost = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '';
 
 app.get("/*", function(req, res, next) {
-  ReactRouter.getProps(req.path).then(function(data) {
+  Promise.join(
+      criticalPath.getCriticalCssPath(req.path),
+      ReactRouter.getProps(req.path),
+      function (criticalCss, data) {
+    if (!criticalCss && !criticalPath.isPenthouse(req)) {
+      criticalPath.generateCriticalCss(req.path)
+    }
     var component = ReactApp({
       path: req.path,
       cssPath: devServerHost + '/js/entry.css',
+      cssInline: criticalCss,
       entryBundlePath: devServerHost + '/js/entry.bundle.js',
       commonBundlePath: devServerHost + '/js/common.bundle.js',
       pageType: data.pageType,
@@ -112,7 +120,7 @@ app.get("/*", function(req, res, next) {
       "Content-Type": "text/html"
     });
     res.end(html);
-  }, next).catch(next);
+  });
 });
 
 var port = parseInt(process.env.PORT || 8080);
