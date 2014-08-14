@@ -2,8 +2,8 @@
 
 var React = require("react");
 var PropTypes = React.PropTypes;
-var dispatch = require("../dispatch");
-var isMobile = require("../utils/mobile");
+var dispatch = require("js/dispatch");
+var isMobile = require("js/utils/mobile");
 
 var Link = React.createClass({
   propTypes: {

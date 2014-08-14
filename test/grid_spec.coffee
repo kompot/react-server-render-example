@@ -1,10 +1,11 @@
+paths = require '../paths'
 {test, makeDriver, expect, assert} = require "./client"
 
 describe "grid on index page", ->
 
   [driver, sleep, $] = [null, null, null]
 
-  before -> {driver, $, sleep} = makeDriver("http://localhost:8080")
+  before -> {driver, $, sleep} = makeDriver('http://' + paths.devHost + ':' + paths.devPort)
 
   after -> driver.quit()
 

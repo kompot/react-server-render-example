@@ -1,17 +1,19 @@
+var paths = require('root/paths');
+
 var express = require("express");
 var React = require("react");
 var fs = require("fs");
 var path = require("path");
 var morgan = require("morgan");
 var compression = require("compression");
-var schemaValidator = require('./schema-validator');
+var schemaValidator = require('js/server/schema-validator');
 var Promise = require("bluebird");
-var criticalPath = require('./critical-path');
+var criticalPath = require('js/server/critical-path');
 
 var app = express();
-var ReactApp = require("../views/app.jsx");
-var ReactRouter = require("../routes");
-var Const = require("../const");
+var ReactApp = require("js/views/app.jsx");
+var ReactRouter = require("js/routes");
+var Const = require("js/const");
 
 app.use(compression());
 console.log('process.env.NODE_STATIC_DIR ', process.env.NODE_STATIC_DIR);
@@ -93,7 +95,10 @@ app.delete('/api/auth', function(req, res) {
   })
 });
 
-var devServerHost = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '';
+var devServerHost = '';
+if (process.env.NODE_ENV === 'development') {
+  devServerHost = 'http://' + paths.webpackHost + ':' + paths.webpackPort;
+}
 
 app.get("/*", function(req, res, next) {
   Promise.join(
@@ -123,7 +128,7 @@ app.get("/*", function(req, res, next) {
   });
 });
 
-var port = parseInt(process.env.PORT || 8080);
+var port = parseInt(process.env.PORT || paths.devPort);
 app.listen(port, function() {
   console.log("serving on port " + port);
 });

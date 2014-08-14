@@ -1,4 +1,4 @@
-var constants = require('./constants');
+var constants = require('js/flux/constants');
 
 module.exports = {
   loginUser: function (payload) {

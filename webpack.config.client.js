@@ -1,7 +1,7 @@
 var webpack = require('webpack');
 var _ = require("lodash");
 var path = require('path');
-var paths = require('./gulppaths');
+var paths = require('./paths');
 var nib = require('nib');
 var jeet = require('jeet');
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
@@ -11,21 +11,25 @@ var baseConfig = {
 //  devtool: 'source-map',
   progress: true,
   entry: {
-    entry: [
-      './src/js/views/entry.jsx'
-    ],
-    fake: ['./src/js/fake.js']
+    entry: ['./src/js/views/entry.jsx'],
+    fake:  ['./src/js/fake.js']
   },
   output: {
-    path: path.join(__dirname, (paths.dst[process.env.NODE_ENV] && paths.dst[process.env.NODE_ENV].root) || './dev'),
-    publicPath: 'http://localhost:3000/js/',
+    path: path.join(__dirname, paths.dst[process.env.NODE_ENV].root),
+    publicPath: 'http://' + paths.webpackHost + ':' + paths.webpackPort + '/js/',
     filename: '[name].bundle.js',
     chunkFilename: "[hash]/js/[id].js",
     hotUpdateMainFilename: "[hash]/update.json",
     hotUpdateChunkFilename: "[hash]/js/[id].update.js"
   },
   resolve: {
-    extensions: ['', '.js', '.jsx', '.styl', '.css']
+    extensions: ['', '.js', '.jsx', '.styl', '.css'],
+    alias: {
+      'root': __dirname,
+      'styles': __dirname + '/src/styles',
+      'js': __dirname + '/src/js',
+      'json-schema': __dirname + '/src/json-schema'
+    }
   },
   stylus: {
     use: [nib(), jeet()]
@@ -66,7 +70,7 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   delete baseConfig.plugins[0];
   for (var entry in baseConfig.entry) {
-    baseConfig.entry[entry].push('webpack-dev-server/client?http://localhost:3000');
+    baseConfig.entry[entry].push('webpack-dev-server/client?http://' + paths.webpackHost + ':' + paths.webpackPort);
     baseConfig.entry[entry].push('webpack/hot/dev-server');
   }
 }

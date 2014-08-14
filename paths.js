@@ -6,13 +6,15 @@ var client        = '/client';
 var server        = '/server';
 
 module.exports = {
+  devHost:       'localhost',
+  devPort:       8080,
+  webpackHost:   'localhost',
+  webpackPort:   3000,
   serverEntry:   '/server.js',
   webpackPrefix: 'bundle',
   client:        client,
   server:        server,
   src: {
-//    css:         srcPath + '/styles',
-//    cssWatch:    srcPath + '/styles/**/*',
     cssCompile: [srcPath + '/styles/app.styl',
            '!' + srcPath + '/styles/_*.styl'],
     js:          srcPath + '/js',

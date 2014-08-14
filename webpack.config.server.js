@@ -1,7 +1,7 @@
 var webpack = require('webpack');
 var _ = require("lodash");
 var path = require('path');
-var paths = require('./gulppaths');
+var paths = require('./paths');
 
 // put here those `package.json` dependencies
 // that should be packed into our server bundle
@@ -29,7 +29,13 @@ var baseConfig = {
   },
   externals: [],
   resolve: {
-    extensions: ['', '.js', '.jsx', '.styl', '.css']
+    extensions: ['', '.js', '.jsx', '.styl', '.css'],
+    alias: {
+      'root': __dirname,
+      'styles': __dirname + '/src/styles',
+      'js': __dirname + '/src/js',
+      'json-schema': __dirname + '/src/json-schema'
+    }
   },
   module: {
     loaders: [

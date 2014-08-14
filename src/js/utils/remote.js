@@ -1,6 +1,7 @@
 var superagent = require("superagent");
 var Promise = require("bluebird");
 var logging = require("./logging");
+var paths = require("root/paths");
 
 var Remote = function() {
 
@@ -11,7 +12,7 @@ if (typeof window === "undefined") {
   Remote.prototype.get = function(uri) {
     return new Promise(function(resolve, reject) {
       logging.info("server loading", uri);
-      var serverHost = process.env.SERVER_HOST || "http://127.0.0.1:8080";
+      var serverHost = process.env.SERVER_HOST || 'http://' + paths.devHost + ':' + paths.devPort;
       superagent
         .get(serverHost + uri)
         .end(function(response) {

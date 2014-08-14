@@ -1,5 +1,5 @@
 var Promise = require("bluebird");
-var logging = require("../utils/logging");
+var logging = require("js/utils/logging");
 
 var browserCache = {};
 

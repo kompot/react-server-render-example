@@ -2,8 +2,8 @@
 
 var React = require("react");
 var PropTypes = React.PropTypes;
-var dispatch = require("../dispatch");
-var Forms = require("./forms/index.jsx");
+var dispatch = require("js/dispatch");
+var Forms = require("js/views/forms/index.jsx");
 var Fluxxor = require("fluxxor");
 
 var Login = React.createClass({

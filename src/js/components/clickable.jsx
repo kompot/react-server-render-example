@@ -1,7 +1,7 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var isMobile = require("../utils/mobile");
+var isMobile = require("js/utils/mobile");
 var PropTypes = React.PropTypes;
 
 var Clickable = React.createClass({

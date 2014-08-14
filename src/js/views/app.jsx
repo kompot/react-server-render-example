@@ -1,13 +1,13 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Const = require("../const");
-var Grid = require("./grid.jsx");
-var Element = require("./element.jsx");
-var Preloader = require("../components/preloader.jsx");
-var NotFound = require("./not-found.jsx");
-var dispatch = require("../dispatch");
-var Login = require("./login.jsx");
+var Const = require("js/const");
+var Grid = require("js/views/grid.jsx");
+var Element = require("js/views/element.jsx");
+var Preloader = require("js/components/preloader.jsx");
+var NotFound = require("js/views/not-found.jsx");
+var dispatch = require("js/dispatch");
+var Login = require("js/views/login.jsx");
 
 var PropTypes = React.PropTypes;
 

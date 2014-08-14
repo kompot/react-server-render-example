@@ -1,13 +1,13 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var Link = require("./link.jsx");
-var routes = require("../routes");
+var Link = require("js/views/link.jsx");
+var routes = require("js/routes");
 var PropTypes = React.PropTypes;
 var cx = require("react/lib/cx");
-var DomMixin = require("../utils/dom-mixin");
+var DomMixin = require("js/utils/dom-mixin");
 var _ = require("lodash");
-var isMobile = require("../utils/mobile.js");
+var isMobile = require("js/utils/mobile.js");
 
 var itemShape = {
   id: PropTypes.number.isRequired,

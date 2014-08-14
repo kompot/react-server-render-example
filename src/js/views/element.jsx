@@ -1,9 +1,9 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var dispatch = require("../dispatch");
-var Clickable = require("../components/clickable.jsx");
-var Popup = require("./popup.jsx");
+var dispatch = require("js/dispatch");
+var Clickable = require("js/components/clickable.jsx");
+var Popup = require("js/views/popup.jsx");
 var PropTypes = React.PropTypes;
 
 var Element = React.createClass({

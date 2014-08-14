@@ -1,6 +1,6 @@
 var XRegExp = require("xregexp").XRegExp;
 var ReactComponent = require("react/lib/ReactComponent");
-var dispatch = require("./dispatch");
+var dispatch = require("js/dispatch");
 var invariant = require("react/lib/invariant");
 var _ = require("lodash");
 

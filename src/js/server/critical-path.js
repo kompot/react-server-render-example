@@ -5,13 +5,14 @@ var Promise = require("bluebird");
 Promise.promisifyAll(fs);
 
 var staticFolder = process.env.NODE_STATIC_DIR;
+var paths = require('root/paths');
 
 module.exports = {
 
   generateCriticalCss: function (p) {
     // penthouse does not seem to be promisifiable
     penthouse({
-      url: 'http://localhost:8080' + p,
+      url: 'http://' + paths.devHost + ':' + paths.devPort + p,
       css: path.join(staticFolder, '/js/entry.css'),
       width: 1920,
       height: 1080

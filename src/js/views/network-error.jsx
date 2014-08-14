@@ -1,9 +1,9 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var PopupBase = require("../components/popup-base.jsx");
-var dispatch = require("../dispatch");
-var logging = require("../utils/logging");
+var PopupBase = require("js/components/popup-base.jsx");
+var dispatch = require("js/dispatch");
+var logging = require("js/utils/logging");
 
 var NetworkErrorPopup = React.createClass({
   render: function() {

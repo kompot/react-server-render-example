@@ -1,10 +1,10 @@
 /** @jsx React.DOM */
 
 var React = require("react");
-var dispatch = require("../dispatch");
+var dispatch = require("js/dispatch");
 var cx = require("react/lib/cx");
-var DomMixin = require("../utils/dom-mixin");
-var isMobile = require("../utils/mobile");
+var DomMixin = require("js/utils/dom-mixin");
+var isMobile = require("js/utils/mobile");
 
 var PopupBase = React.createClass({
 

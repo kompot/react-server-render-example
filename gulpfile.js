@@ -13,7 +13,7 @@ var webpack = require("webpack");
 var runSequence = require('run-sequence');
 var nib = require('nib');
 var jeet = require('jeet');
-var paths = require('./gulppaths');
+var paths = require('./paths');
 var pagespeed = require('psi');
 var ngrok = require('ngrok');
 
@@ -72,7 +72,7 @@ gulp.task('lint:js', function() {
 });
 
 gulp.task('webpack:client', function() {
-  var config = require('./webpack.config');
+  var config = require('./webpack.config.client');
   return gulp.src(paths.src.js)
     .pipe($.webpack(config, webpack))
     .pipe($.filesize())
@@ -180,7 +180,7 @@ gulp.task('http:webpack:kill', function (callback) {
 });
 
 gulp.task('pagespeed:ngrok', function (callback) {
-  ngrok.connect(8080, function(err, url) {
+  ngrok.connect(paths.devPort, function(err, url) {
     if (err) {
       $.util.log(err)
     }
