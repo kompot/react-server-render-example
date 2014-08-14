@@ -12,8 +12,6 @@ var baseConfig = {
   progress: true,
   entry: {
     entry: [
-      'webpack-dev-server/client?http://localhost:3000',
-      'webpack/hot/dev-server',
       './src/js/views/entry.jsx'
     ],
     fake: ['./src/js/fake.js']
@@ -63,19 +61,14 @@ var baseConfig = {
 };
 
 if (process.env.NODE_ENV === 'production') {
-  for (var entry in baseConfig.entry) {
-    // TODO add webpack modules for dev environment instead of removing
-    // for production
-    baseConfig.entry[entry] = _.compact(_.map(baseConfig.entry[entry], function (e) {
-      if (!(e.indexOf('webpack') === 0)) {
-        return e;
-      }
-    }));
-  }
-  delete baseConfig.devtool;
   delete baseConfig.plugins[1];
+  delete baseConfig.devtool;
 } else {
   delete baseConfig.plugins[0];
+  for (var entry in baseConfig.entry) {
+    baseConfig.entry[entry].push('webpack-dev-server/client?http://localhost:3000');
+    baseConfig.entry[entry].push('webpack/hot/dev-server');
+  }
 }
 baseConfig.plugins = _.compact(baseConfig.plugins);
 
