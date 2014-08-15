@@ -127,6 +127,19 @@ gulp.task('hash', function (callback) {
 
 require('coffee-script/register');
 
+// this hack is for webpack absolute aliases in JS `require`s.
+// as we do not assemble tests with webpack and need to resolve references
+gulp.task('test:before', function() {
+  return gulp.src(paths.src.js + '/*')
+      .pipe(gulp.dest('./node_modules/js'))
+});
+
+gulp.task('test:after', function() {
+  return gulp.src('./node_modules/js', { read: false })
+      .pipe($.rimraf())
+      .on('error', $.util.log);
+});
+
 gulp.task('test:private', function (callback) {
   // seems like there's an issue with Mocha that requires explicit callback
   // wait for https://github.com/visionmedia/mocha/issues/1276 to be resolved
@@ -138,17 +151,25 @@ gulp.task('test:private', function (callback) {
       }, callback));
 });
 
+var httpServer;
 gulp.task('http', function (callback) {
   var entryPoint = paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].jsServer + paths.serverEntry
   process.env.NODE_STATIC_DIR = paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].rootClient
   if (fs.existsSync(entryPoint)) {
-    spawn('node', [entryPoint], {stdio: 'inherit'});
+    httpServer = spawn('node', [entryPoint], {stdio: 'inherit'});
   }
   setTimeout(function () {
     // some delay to let node start up before reporting it's up
     // should be replaced with a real watcher
     callback()
   }, 100);
+});
+
+gulp.task('http:kill', function (callback) {
+  if (httpServer) {
+    httpServer.kill('SIGTERM');
+  }
+  callback();
 });
 
 gulp.task('http:webpack', function (callback) {
@@ -192,7 +213,7 @@ gulp.task('run', function (callback) {
 });
 
 gulp.task('test', function (callback) {
-  runSequence('run', 'test:private', callback);
+  runSequence('run', 'test:before', 'test:private', 'test:after', 'http:kill', callback);
 });
 
 gulp.task('pagespeed', function (callback) {
