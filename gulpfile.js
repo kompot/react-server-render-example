@@ -3,6 +3,7 @@
 var spawn = require('child_process').spawn;
 var exec = require('child_process').exec;
 var path = require('path');
+var fs = require('fs');
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')({
   pattern: 'gulp{-,.}*',
@@ -137,14 +138,12 @@ gulp.task('test:private', function (callback) {
       }, callback));
 });
 
-var httpServer;
-gulp.task('http', ['http:kill'], function (callback) {
-  if (httpServer) {
-    httpServer.kill('SIGTERM');
-  }
+gulp.task('http', function (callback) {
   var entryPoint = paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].jsServer + paths.serverEntry
   process.env.NODE_STATIC_DIR = paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].rootClient
-  httpServer = spawn('node', [entryPoint], {stdio: 'inherit'});
+  if (fs.existsSync(entryPoint)) {
+    spawn('node', [entryPoint], {stdio: 'inherit'});
+  }
   setTimeout(function () {
     // some delay to let node start up before reporting it's up
     // should be replaced with a real watcher
@@ -152,31 +151,13 @@ gulp.task('http', ['http:kill'], function (callback) {
   }, 100);
 });
 
-var httpWebpackServer;
 gulp.task('http:webpack', function (callback) {
-  if (httpWebpackServer) {
-    httpWebpackServer.kill('SIGTERM');
-  }
-  httpWebpackServer = spawn('node', ['./webpack.devserver.js'], {stdio: 'inherit'});
+  spawn('node', ['./webpack.devserver.js'], {stdio: 'inherit'});
   setTimeout(function () {
     // some delay to let node start up before reporting it's up
     // should be replaced with a real watcher
     callback()
   }, 100);
-});
-
-gulp.task('http:kill', function (callback) {
-  if (httpServer) {
-    httpServer.kill('SIGTERM');
-  }
-  callback()
-});
-
-gulp.task('http:webpack:kill', function (callback) {
-  if (httpWebpackServer) {
-    httpWebpackServer.kill('SIGTERM');
-  }
-  callback()
 });
 
 gulp.task('pagespeed:ngrok', function (callback) {
@@ -203,7 +184,7 @@ gulp.task('pagespeed:private', function(callback) {
 });
 
 gulp.task('build', function (callback) {
-  runSequence('clean', 'lint:js', 'webpack:client', 'webpack:server', 'hash', callback);
+  runSequence('clean', 'lint:css', 'lint:js', 'webpack:client', 'webpack:server', 'hash', callback);
 });
 
 gulp.task('run', function (callback) {
@@ -211,18 +192,18 @@ gulp.task('run', function (callback) {
 });
 
 gulp.task('test', function (callback) {
-  runSequence('run', 'test:private', 'http:kill', callback);
+  runSequence('run', 'test:private', callback);
 });
 
 gulp.task('pagespeed', function (callback) {
-  runSequence('run', 'pagespeed:private', 'http:kill', callback);
+  runSequence('run', 'pagespeed:private', callback);
 });
 
 gulp.task('default', function (callback) {
   // `webpack:client` is used only for generating critical path css (generated once per gulp run)
   // as `http:webpack` provides dev-time client dependencies
-  runSequence('clean', 'http:webpack', ['webpack:client', 'webpack:server'], callback);
-  var entryPoint = paths.dst[process.env.NODE_ENV].jsServer + paths.serverEntry
+  runSequence('clean', 'http:webpack', ['webpack:client', 'webpack:server', 'http'], callback);
+  var entryPoint = paths.dst[process.env.NODE_ENV].jsServer + paths.serverEntry;
   gulp.watch(entryPoint, ['http']);
 });
 
