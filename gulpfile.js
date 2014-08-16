@@ -1,9 +1,7 @@
 'use strict';
 
 var spawn = require('child_process').spawn;
-var exec = require('child_process').exec;
 var path = require('path');
-var fs = require('fs');
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')({
   pattern: 'gulp{-,.}*',
@@ -72,20 +70,27 @@ gulp.task('lint:js', function() {
     .pipe(process.env.NODE_ENV === 'production' ? $.eslint.failOnError() : $.util.noop());
 });
 
-gulp.task('webpack:client', function() {
-  var config = require('./webpack.config.client');
+function webpackTask(config, dst) {
   return gulp.src(paths.src.js)
     .pipe($.webpack(config, webpack))
     .pipe($.filesize())
-    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].js));
+    .pipe(gulp.dest(dst));
+}
+
+gulp.task('webpack:client', function() {
+  var config = require('./webpack.config.client');
+  return webpackTask(config, paths.dst[process.env.NODE_ENV].js);
 });
 
 gulp.task('webpack:server', function() {
   var config = require('./webpack.config.server');
-  return gulp.src(paths.src.js)
-    .pipe($.webpack(config, webpack))
-    .pipe($.filesize())
-    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].jsServer));
+  return webpackTask(config, paths.dst[process.env.NODE_ENV].jsServer);
+});
+
+gulp.task('webpack:server:nowatch', function() {
+  var config = require('./webpack.config.server');
+  delete config.watch;
+  return webpackTask(config, paths.dst[process.env.NODE_ENV].jsServer);
 });
 
 var revAllOptions = {
@@ -140,24 +145,30 @@ gulp.task('test:after', function() {
       .on('error', $.util.log);
 });
 
-gulp.task('test:private', function (callback) {
+gulp.task('test:private', function () {
   // seems like there's an issue with Mocha that requires explicit callback
   // wait for https://github.com/visionmedia/mocha/issues/1276 to be resolved
-  gulp.src(paths.tst.root, { read: false })
+  return gulp.src(paths.tst.root, { read: false })
       .pipe($.mocha({
         reporter: 'spec',
         require: 'chai',
         timeout: 100000
-      }, callback));
+      }));
 });
 
 var httpServer;
+
+function killHttpServer() {
+  if (httpServer) {
+    httpServer.kill('SIGTERM');
+  }
+}
+
 gulp.task('http', function (callback) {
+  killHttpServer();
   var entryPoint = paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].jsServer + paths.serverEntry
   process.env.NODE_STATIC_DIR = paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].rootClient
-  if (fs.existsSync(entryPoint)) {
-    httpServer = spawn('node', [entryPoint], {stdio: 'inherit'});
-  }
+  httpServer = spawn('node', [entryPoint], {stdio: 'inherit'});
   setTimeout(function () {
     // some delay to let node start up before reporting it's up
     // should be replaced with a real watcher
@@ -166,9 +177,7 @@ gulp.task('http', function (callback) {
 });
 
 gulp.task('http:kill', function (callback) {
-  if (httpServer) {
-    httpServer.kill('SIGTERM');
-  }
+  killHttpServer();
   callback();
 });
 
@@ -223,7 +232,7 @@ gulp.task('pagespeed', function (callback) {
 gulp.task('default', function (callback) {
   // `webpack:client` is used only for generating critical path css (generated once per gulp run)
   // as `http:webpack` provides dev-time client dependencies
-  runSequence('clean', 'http:webpack', ['webpack:client', 'webpack:server', 'http'], callback);
+  runSequence('clean', 'http:webpack', 'webpack:server:nowatch', ['webpack:client', 'webpack:server'], callback);
   var entryPoint = paths.dst[process.env.NODE_ENV].jsServer + paths.serverEntry;
   gulp.watch(entryPoint, ['http']);
 });
