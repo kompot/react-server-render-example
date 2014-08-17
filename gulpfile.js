@@ -22,7 +22,8 @@ var implicitEnvsByTask = {
   'pagespeed': 'production',
   'run':       'production',
   'test':      'production'
-}
+};
+
 var task = $.util.env._[0];
 var implicitEnv = implicitEnvsByTask[task] ? implicitEnvsByTask[task] : 'development';
 process.env.NODE_ENV = process.env.NODE_ENV || implicitEnv;
@@ -43,9 +44,7 @@ gulp.task('lint:css', function () {
         'important': true,
         'ids': true
       }))
-    .pipe($.csslint.reporter())
-//    .pipe($.filesize())
-//    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV].css));
+    .pipe($.csslint.reporter());
 });
 
 gulp.task('clean', function () {
@@ -93,41 +92,26 @@ gulp.task('webpack:server:nowatch', function() {
   return webpackTask(config, paths.dst[process.env.NODE_ENV].jsServer);
 });
 
-var revAllOptions = {
-  transformFilename: function (file, hash) {
-    var ext = path.extname(file.path);
-    if (file.path.indexOf(paths.serverEntry) != -1) {
-      return path.basename(file.path, ext) + ext;
-    } else {
-      return path.basename(file.path, ext) + '.' + hash.substr(0, 8) + ext;
+gulp.task('hash', function () {
+  var revAllOptions = {
+    transformFilename: function (file, hash) {
+      var ext = path.extname(file.path);
+      if (file.path.indexOf(paths.serverEntry) != -1) {
+        return path.basename(file.path, ext) + ext;
+      } else {
+        return path.basename(file.path, ext) + '.' + hash.substr(0, 8) + ext;
+      }
     }
-  }
-};
+  };
 
-var revAllSrc = {
-  client: paths.dst[process.env.NODE_ENV].rootClient + '/**/*',
-  server: paths.dst[process.env.NODE_ENV].rootServer + '/**/*'
-};
+  var revAllSrc = [
+    paths.dst[process.env.NODE_ENV].js + '/**/*',
+    paths.dst[process.env.NODE_ENV].jsServer + '/**/*'
+  ];
 
-gulp.task('hash:client', function () {
-  return gulp.src(revAllSrc.client)
+  return gulp.src(revAllSrc, { base: paths.dst[process.env.NODE_ENV].rootClient })
     .pipe($.revAll(revAllOptions))
     .pipe(gulp.dest(paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].rootClient));
-});
-
-gulp.task('hash:server', function () {
-  return gulp.src(revAllSrc.server)
-    .pipe($.revAll(revAllOptions))
-    .pipe(gulp.dest(paths.dst[process.env.NODE_ENV + process.env.NODE_ENV_MODIFIER].rootServer));
-});
-
-gulp.task('hash', function (callback) {
-  // these 2 should be run sequentially as gulp-rev-all keeps state
-  // between runs (as we share options between tasks and gulp-rev-all stores
-  // state in there) and this leads to a nice effect of revisioning client
-  // assets in server files but may disappear any moment
-  // https://github.com/smysnk/gulp-rev-all/issues/28
-  runSequence('hash:client', 'hash:server', callback)
 });
 
 require('coffee-script/register');
